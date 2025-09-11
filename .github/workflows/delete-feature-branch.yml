@@ -1,0 +1,20 @@
+name: Delete Feature Branch
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete_branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3  # Usa v3, más actual
+
+      - name: Delete branch if merged
+        if: github.event.pull_request.merged == true && github.head_ref != 'dev' && github.head_ref != 'main'
+        run: |
+          git push origin --delete ${{ github.head_ref }} || echo "Branch not found. Skipping."
