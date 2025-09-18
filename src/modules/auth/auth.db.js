@@ -1,7 +1,7 @@
 const { Request, TYPES } = require('tedious');
 const { createConnection } = require('../../utils/database/dbconnection');
 
-function loginUser(username, password, callback) {
+function loginUser(email, password, callback) {
   const connection = createConnection();
 
   connection.on('connect', (err) => {
@@ -11,7 +11,7 @@ function loginUser(username, password, callback) {
       return callback(err);
     }
 
-    const query = `SELECT * FROM [dbo].[USERS] WHERE username = @username AND password = @password`;
+    const query = `SELECT * FROM [dbo].[USERS] WHERE email = @email AND password = @password`;
     const request = new Request(query, (err, rowCount) => {
       if (err) {
         console.error('SQL error during login:', err);
@@ -39,7 +39,7 @@ function loginUser(username, password, callback) {
       return callback(null, rows[0]);
     });
 
-    request.addParameter('username', TYPES.NVarChar, username);
+    request.addParameter('email', TYPES.NVarChar, email);
     request.addParameter('password', TYPES.NVarChar, password);
 
     connection.execSql(request);

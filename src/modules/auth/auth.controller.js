@@ -1,10 +1,10 @@
 const authService = require('./auth.service');
 
 exports.login = (req, res) => {
-  const { username, password } = req.body;
-  
+  const { email, password } = req.body;
+
   authService
-    .login(username, password)
+    .login(email, password)
     .then(token => {
       if (!token) {
         return res.status(401).json({ message: "Invalid credentials" });
