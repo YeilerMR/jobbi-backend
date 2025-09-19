@@ -11,8 +11,28 @@ exports.login = (email, password) => {
       if (err) return reject(err);
       if (!user) return resolve(null);
 
+      // Destructure user and exclude password
+      const {
+        id_user,
+        id_rol,
+        name,
+        last_name,
+        email: userEmail,
+        phone,
+        state_user
+      } = user;
+
+      // Create JWT with full user info (except password)
       const token = jwt.sign(
-        { email: user.email, id: user.id },
+        {
+          id_user,
+          id_rol,
+          name,
+          last_name,
+          email: userEmail,
+          phone,
+          state_user
+        },
         SECRET_KEY,
         { expiresIn: '1h' }
       );
