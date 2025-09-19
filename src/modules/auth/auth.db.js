@@ -5,8 +5,10 @@ async function loginUser(email, password, callback) {
   try {
     const connection = await createConnection();
 
-    const [rows, fields] = await connection.execute(
-      'SELECT * FROM User WHERE email = ? AND password = ?',
+    const [rows] = await connection.execute(
+      `SELECT id_user, id_rol, name, last_name, email, phone, password, state_user 
+       FROM User 
+       WHERE email = ? AND password = ?`,
       [email, password]
     );
 
