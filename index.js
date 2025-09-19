@@ -7,10 +7,18 @@ app.use(express.json());
 
 // Import and use routes from the auth module
 const authRoutes = require('./src/modules/auth/auth.routes');
+const businessRoutes = require('./src/modules/business/business.routes');
 
 
-
+// --------------------------------------
+// ----------- AUTH ROUTES --------------
+// --------------------------------------
 app.use('/auth', authRoutes);
+
+// --------------------------------------
+// ----------- BUSINESS ROUTES ----------
+// --------------------------------------
+app.use('/business', businessRoutes);
 
 app.get('/', (req, res) => {
   res.send('Jobbi desde Express!');
