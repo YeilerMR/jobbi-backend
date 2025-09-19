@@ -6,7 +6,7 @@ async function loginUser(email, password, callback) {
     const connection = await createConnection();
 
     const [rows, fields] = await connection.execute(
-      'SELECT * FROM USERS WHERE email = ? AND password = ?',
+      'SELECT * FROM User WHERE email = ? AND password = ?',
       [email, password]
     );
 

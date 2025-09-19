@@ -7,9 +7,9 @@ exports.login = (req, res) => {
     .login(email, password)
     .then(token => {
       if (!token) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ succes: false, message: "Invalid credentials" });
       }
-      res.json({ token });
+      res.json({ succes: true, message: "Succes!", token });
     })
     .catch(err => {
       console.error("Login error:", err);
