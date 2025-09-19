@@ -1,85 +1,76 @@
-const { Request, TYPES } = require('tedious');
 const { createConnection } = require('../../utils/database/dbconnection');
 
+/**
+ * Compat login helper (callback style) kept for existing login flow.
+ */
 async function loginUser(email, password, callback) {
   try {
     const connection = await createConnection();
 
+    // Fetch by email only; password will be compared in the service using bcrypt
     const [rows] = await connection.execute(
-      `SELECT id_user, id_rol, name, last_name, email, phone, password, state_user 
-       FROM User 
-       WHERE email = ? AND password = ?`,
-      [email, password]
+      `SELECT id_user, id_rol, name, last_name, email, phone, password, state_user
+       FROM ` + '`User`' + `
+       WHERE email = ? LIMIT 1`,
+      [email]
     );
 
     await connection.end();
 
-    if (rows.length === 0) {
-      return callback(null, null); // No user found
-    }
-
+    if (rows.length === 0) return callback(null, null);
     return callback(null, rows[0]);
-
   } catch (err) {
-    console.error('❌ Login error:', err.message);
+    console.error('❌ Login error:', err.message || err);
     return callback(err);
   }
 }
 
-module.exports = { loginUser };
+/**
+ * Busca un usuario por email. Retorna objeto usuario o null.
+ */
+async function getUserByEmail(email) {
+  try {
+    const connection = await createConnection();
+    const [rows] = await connection.execute(
+      `SELECT id_user, id_rol, name, last_name, email, phone, password, state_user
+       FROM ` + '`User`' + `
+       WHERE email = ? LIMIT 1`,
+      [email]
+    );
+    await connection.end();
+    return rows.length ? rows[0] : null;
+  } catch (err) {
+    console.error('DB getUserByEmail error:', err);
+    throw err;
+  }
+}
 
+/**
+ * Crea un nuevo usuario usando consultas parametrizadas.
+ * userObj: { id_rol, name, last_name, email, phone, password, state_user }
+ */
+async function createUser(userObj) {
+  try {
+    const connection = await createConnection();
+    const [result] = await connection.execute(
+      `INSERT INTO ` + '`User`' + ` (id_rol, name, last_name, email, phone, password, state_user)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        userObj.id_rol,
+        userObj.name,
+        userObj.last_name,
+        userObj.email,
+        userObj.phone,
+        userObj.password,
+        userObj.state_user
+      ]
+    );
+    await connection.end();
+    return { insertId: result.insertId };
+  } catch (err) {
+    console.error('DB createUser error:', err);
+    throw err;
+  }
+}
 
-// SQL Server | El método anterior por aquello
-
-// function loginUser(email, password, callback) {
-//   const connection = createConnection();
-
-//   connection.on('connect', (err) => {
-//     if (err) {
-//       console.error('Connection error:', err);
-//       connection.close();
-//       return callback(err);
-//     }
-
-//     const query = `SELECT * FROM [dbo].[USERS] WHERE email = @email AND password = @password`;
-//     const request = new Request(query, (err, rowCount) => {
-//       if (err) {
-//         console.error('SQL error during login:', err);
-//         connection.close();
-//         return callback(err);
-//       }
-//     });
-
-//     const rows = [];
-//     request.on('row', (columns) => {
-//       const row = {};
-//       columns.forEach(col => {
-//         row[col.metadata.colName] = col.value;
-//       });
-//       rows.push(row);
-//     });
-
-//     request.on('requestCompleted', () => {
-//       if (rows.length === 0) {
-//         connection.close();
-//         return callback(null, null);
-//       }
-
-//       connection.close();
-//       return callback(null, rows[0]);
-//     });
-
-//     request.addParameter('email', TYPES.NVarChar, email);
-//     request.addParameter('password', TYPES.NVarChar, password);
-
-//     connection.execSql(request);
-//   });
-
-//   connection.on('error', (err) => {
-//     console.error('Connection error event:', err);
-//     connection.close();
-//     callback(err);
-//   });
-
-//   connection.connect();
-// }
+module.exports = { loginUser, getUserByEmail, createUser };
