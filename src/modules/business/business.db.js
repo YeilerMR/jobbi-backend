@@ -84,6 +84,19 @@ async function findBusinessById(businessId) {
   return rows[0];
 }
 
+async function findBranchById(id_branch) {
+  const connection = await createConnection();
+
+  const [rows] = await connection.execute(
+    `SELECT * FROM Branch WHERE id_branch = ?`,
+    [id_branch]
+  );
+
+  await connection.end();
+
+  return rows[0]; // Return the branch if found, else undefined
+}
+
 async function updateBusinessById(businessId, updateData) {
   const connection = await createConnection();
 
@@ -151,5 +164,6 @@ module.exports = {
   findBusinessById,
   updateBusinessById,
   softDeleteBusinessById,
-  softDeleteBranchesByBusinessId
+  softDeleteBranchesByBusinessId,
+  findBranchById
 };
