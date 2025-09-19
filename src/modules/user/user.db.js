@@ -3,7 +3,7 @@ const { createConnection } = require('../../utils/database/dbconnection');
 async function getUserById(userId) {
   const connection = await createConnection();
   const [rows] = await connection.execute(
-    `SELECT * FROM User WHERE id_user = ?`,
+    `SELECT id_rol, email FROM User WHERE id_user = ?`,
     [userId]
   );
   await connection.end();
