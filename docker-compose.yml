@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  backend:
+    build: .
+    ports:
+      - "3000:3000"   # ← Esto es CLAVE: siempre expone en localhost:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    # Si usas .env, descomenta:
+    env_file:
+      - .env
+    command: npm run dev
