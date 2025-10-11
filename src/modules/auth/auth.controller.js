@@ -5,11 +5,11 @@ exports.login = (req, res) => {
 
   authService
     .login(email, password)
-    .then(token => {
-      if (!token) {
+    .then(({ role, token }) => {
+      if (!token || !role) {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
-      res.json({ success: true, message: 'Success!', token });
+      res.json({ success: true, message: 'Success!', role, token });
     })
     .catch(err => {
       console.error('Login error:', err);
