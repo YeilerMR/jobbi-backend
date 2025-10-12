@@ -25,14 +25,22 @@ exports.login = (email, password) => {
         if (!match) return resolve(null);
 
         const { id_user, id_rol, name, last_name, email: userEmail, phone, state_user } = user;
-        const token = jwt.sign({ id_user, id_rol, name, last_name, email: userEmail, phone, state_user }, SECRET_KEY, { expiresIn: '1h' });
-        resolve(token);
+        
+        const token = jwt.sign(
+          { id_user, id_rol, name, last_name, email: userEmail, phone, state_user },
+          SECRET_KEY,
+          { expiresIn: '1h' }
+        );
+
+        // Resolve both token and role
+        resolve({ role: id_rol, token });
       } catch (ex) {
         return reject(ex);
       }
     });
   });
 };
+
 
 exports.register = async (payload) => {
   try {
