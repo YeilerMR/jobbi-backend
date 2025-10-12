@@ -1,28 +1,22 @@
-## 🚀 Descripción
-*Describe brevemente los cambios y el propósito de este PR...*
+## 🚀 Description
+*Briefly describe the changes and purpose of this PR...*
 
-> ℹ️ Usa `Closes #123` o `Fixes #123` para cerrar issues automáticamente.
+## 📌 Related Issue
 
-## 📌 Issue relacionado
-Closes #ID_DEL_ISSUE
+## 🛠️ Changes Made
+- [ ] New feature
+- [ ] Bug fixes
+- [ ] Code refactoring
+- [ ] Documentation updates
 
-## 🛠️ Cambios realizados
-- [ ] Nueva funcionalidad
-- [ ] Corrección de errores
-- [ ] Refactorización de código
-- [ ] Actualización de documentación
-
-## 🔎 ¿Cómo probar los cambios?
-1. Clona la rama
-2. Instala dependencias: `npm install`
-3. Ejecuta: `npm run dev`
-4. Verifica que...
+## 🔎 How to Test the Changes?
+1. 
 
 ## ✅ Checklist
-- [ ] Tests pasan
-- [ ] Revisado por al menos 1 miembro del equipo
-- [ ] UI/UX revisada (si aplica)
-- [ ] Documentación actualizada
+- [ ] Tests pass
+- [ ] Reviewed by at least 1 team member
+- [ ] UI/UX reviewed (if applicable)
+- [ ] Documentation updated
 
-## 📸 Capturas de pantalla (si aplica)
-*Agrega aquí las capturas de pantalla relevantes...*
+## Screenshots (if applicable)
+*Add relevant screenshots here...*
