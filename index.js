@@ -10,7 +10,7 @@ const authRoutes = require('./src/modules/auth/auth.routes');
 const businessRoutes = require('./src/modules/business/business.routes');
 const serviceRoutes = require('./src/modules/service/service.routes');
 const branchRoutes = require('./src/modules/branch/branch.routes');
-
+const invitationRoutes = require('./src/modules/invitation/invitation.routes');
 
 // --------------------------------------
 // ----------- AUTH ROUTES --------------
@@ -28,9 +28,14 @@ app.use('/business', businessRoutes);
 app.use('/services', serviceRoutes);
 
 // --------------------------------------
-// ----------- BRANCH ROUTES ----------
+// ----------- BRANCH ROUTES ------------
 // --------------------------------------
 app.use('/branches', branchRoutes);
+
+// --------------------------------------
+// ----------- INVITATIONS ROUTES -------
+// --------------------------------------
+app.use('/invitations', invitationRoutes);
 
 app.get('/', (req, res) => {
   res.send('Jobbi desde Express!');
