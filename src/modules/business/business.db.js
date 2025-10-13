@@ -62,7 +62,7 @@ async function findBusinessesByUser(userId) {
   const connection = await createConnection();
 
   const [rows] = await connection.execute(
-    `SELECT * FROM Business WHERE id_user_admin = ? AND state_business = 1`,
+    `SELECT * FROM Business WHERE id_user_admin = ?`,// AND state_business = 1
     [userId]
   );
 
@@ -75,12 +75,13 @@ async function findBusinessById(businessId) {
   const connection = await createConnection();
 
   const [rows] = await connection.execute(
-    `SELECT * FROM Business WHERE id_business = ? AND state_business = 1`,
+    `SELECT * FROM Business WHERE id_business = ?`,//AND state_business = 1
     [businessId]
   );
 
   await connection.end();
-
+  //console.log(rows[0]);
+  
   return rows[0];
 }
 
