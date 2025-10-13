@@ -1,15 +1,26 @@
 const branchService = require("./branch.service");
 
-exports.getBranchesByBusiness = async (req, res) => {
+exports.getBranches = async (req, res) => {
     try {
+        // Authorization check
         if (!req.user || req.user.id_rol != 1) {
             return res.status(405).json({ success: false, message: "Method Not Allowed" });
         }
-        const businessId = req.query.businessId;
-        const userBranches = await branchService.getBranchesByBusiness(businessId);
+
+        const { businessId } = req.query;
+        let userBranches;
+
+        console.log(businessId);
+        if (businessId) {
+            userBranches = await branchService.getBranchesByBusiness(businessId);
+        } else {
+            userBranches = await branchService.getBranchesByUser(req.user.id_user);
+        }
+
         if (!Array.isArray(userBranches) || userBranches.length === 0) {
             return res.status(400).json({ success: false, message: "There are no branches associated" });
         }
+
         res.status(200).json({ success: true, data: userBranches });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

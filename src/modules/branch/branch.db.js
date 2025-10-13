@@ -2,6 +2,26 @@ const { createConnection } = require("../../utils/database/dbconnection");
 
 const tbBranch = "Branch";
 
+async function getBranchesByUser(userId) {
+    const connection = await createConnection();
+    const [rows] = await connection.execute(
+        `SELECT 
+            b.id_branch,
+            b.id_business,
+            b.name AS branch_name,
+            b.location AS branch_location,
+            b.phone AS branch_phone,
+            b.email AS branch_email,
+            b.state_branch
+        FROM Branch b
+        JOIN Business bs ON b.id_business = bs.id_business
+        JOIN User u ON bs.id_user_admin = u.id_user
+        WHERE u.id_user = ?;
+        `, [userId]
+    );
+    await connection.end();
+    return rows;
+}
 
 async function getBranchesByBusiness(businessId) {
     const connection = await createConnection();
@@ -59,8 +79,8 @@ async function deleteBranch(id_branch) {
     return result.affectedRows > 0;
 }
 
-
 module.exports = {
+    getBranchesByUser,
     getBranchesByBusiness,
     getAllBranches,
     getBranchById,
