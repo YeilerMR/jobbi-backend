@@ -1,7 +1,7 @@
 const { connect } = require("mssql");
 const { createConnection } = require("../../utils/database/dbconnection");
 const { findBranchById } = require("../business/business.db");
-const { getUserById, updateUserRole } = require("../user/user.db");
+const { getUserById, getUserByEmail } = require("../user/user.db");
 
 const tbInvitation = "Invitation";
 
@@ -15,7 +15,9 @@ async function createInvitation(invitation) {
     const connection = await createConnection();
 
     try {
-        const { id_client, id_branch, state_invitation } = invitation;
+        const { email, id_branch, state_invitation } = invitation;
+
+        const id_client = await getUserByEmail(email);
 
         await validateUserRoleForUpgrade(id_client);
 
