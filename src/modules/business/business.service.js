@@ -5,7 +5,9 @@ const {
   findBusinessById,
   updateBusinessById,
   softDeleteBusinessById,
-  softDeleteBranchesByBusinessId
+  softDeleteBranchesByBusinessId,
+  searchBusinesses,
+  getBusinessServicesAndSpecialties
 } = require('./business.db');
 
 const { getUserById, updateUserRole } = require('../user/user.db');
@@ -86,4 +88,67 @@ exports.deleteBusiness = async (userId, businessId) => {
   await softDeleteBranchesByBusinessId(businessId);
 
   return true;
+};
+
+/**
+ * Servicio de búsqueda dinámica de negocios
+ * Permite buscar por nombre, ubicación, servicios y especialidades
+ */
+exports.searchBusinesses = async (searchParams) => {
+  try {
+    // Sanitizar parámetros de búsqueda
+    const cleanParams = {
+      name: searchParams.name ? searchParams.name.trim() : undefined,
+      location: searchParams.location ? searchParams.location.trim() : undefined,
+      specialty: searchParams.specialty ? searchParams.specialty.trim() : undefined,
+      service: searchParams.service ? searchParams.service.trim() : undefined,
+      limit: searchParams.limit ? Math.min(parseInt(searchParams.limit), 100) : 50,
+      offset: searchParams.offset ? Math.max(parseInt(searchParams.offset), 0) : 0
+    };
+
+    // Validar que al menos un parámetro de búsqueda esté presente
+    const hasSearchParam = cleanParams.name || cleanParams.location || 
+                          cleanParams.specialty || cleanParams.service;
+
+    if (!hasSearchParam) {
+      // Si no hay parámetros específicos, devolver negocios activos con límite
+      return await searchBusinesses({ limit: cleanParams.limit, offset: cleanParams.offset });
+    }
+
+    const results = await searchBusinesses(cleanParams);
+
+    // Enriquecer resultados con servicios y especialidades si es necesario
+    if (searchParams.includeServices === 'true') {
+      for (const business of results) {
+        business.services_and_specialties = await getBusinessServicesAndSpecialties(business.id_business);
+      }
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error in searchBusinesses service:', error);
+    throw error;
+  }
+};
+
+/**
+ * Obtener detalles completos de un negocio incluyendo servicios y especialidades
+ */
+exports.getBusinessDetails = async (businessId) => {
+  try {
+    const business = await findBusinessById(businessId);
+    if (!business) {
+      return null;
+    }
+
+    const servicesAndSpecialties = await getBusinessServicesAndSpecialties(businessId);
+    
+    return {
+      ...business,
+      services_and_specialties: servicesAndSpecialties
+    };
+  } catch (error) {
+    console.error('Error in getBusinessDetails service:', error);
+    throw error;
+  }
 };

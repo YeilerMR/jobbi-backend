@@ -86,3 +86,71 @@ exports.deleteBusiness = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+/**
+ * Endpoint para búsqueda dinámica de negocios
+ * GET /business/search?name=...&location=...&specialty=...&service=...&limit=...&offset=...
+ */
+exports.searchBusinesses = async (req, res) => {
+  try {
+    const searchParams = {
+      name: req.query.name,
+      location: req.query.location,
+      specialty: req.query.specialty,
+      service: req.query.service,
+      includeServices: req.query.includeServices,
+      limit: req.query.limit,
+      offset: req.query.offset
+    };
+
+    const results = await businessService.searchBusinesses(searchParams);
+
+    res.json({
+      success: true,
+      message: `Found ${results.length} businesses`,
+      data: results,
+      pagination: {
+        limit: parseInt(searchParams.limit) || 50,
+        offset: parseInt(searchParams.offset) || 0,
+        total: results.length
+      }
+    });
+  } catch (error) {
+    console.error('Error in searchBusinesses controller:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Internal server error",
+      error: error.message 
+    });
+  }
+};
+
+/**
+ * Endpoint para obtener detalles completos de un negocio
+ * GET /business/:id/details
+ */
+exports.getBusinessDetails = async (req, res) => {
+  try {
+    const businessId = req.params.id;
+    const businessDetails = await businessService.getBusinessDetails(businessId);
+
+    if (!businessDetails) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Business not found" 
+      });
+    }
+
+    res.json({
+      success: true,
+      data: businessDetails
+    });
+  } catch (error) {
+    console.error('Error in getBusinessDetails controller:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Internal server error",
+      error: error.message 
+    });
+  }
+};
