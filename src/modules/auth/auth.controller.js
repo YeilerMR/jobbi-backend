@@ -5,11 +5,11 @@ exports.login = (req, res) => {
 
   authService
     .login(email, password)
-    .then(token => {
-      if (!token) {
+    .then(({ role, token }) => {
+      if (!token || !role) {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
-      res.json({ success: true, message: 'Success!', token });
+      res.json({ success: true, message: 'Success!', role, token });
     })
     .catch(err => {
       console.error('Login error:', err);
@@ -27,14 +27,14 @@ exports.register = async (req, res) => {
     const result = await authService.register(payload);
     return res.status(201).json({
       success: true,
-      message: 'Usuario registrado correctamente',
+      message: 'User registered correctly',
       data: { id_user: result.insertId, email: result.email },
       token: result.token
     });
   } catch (err) {
     console.error('Controller register error:', err);
     const status = (err && err.status) || 500;
-    const message = (err && err.message) || 'Error en el servidor';
+    const message = (err && err.message) || 'Error in the server';
     return res.status(status).json({ success: false, message });
   }
 };
