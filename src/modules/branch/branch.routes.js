@@ -4,8 +4,8 @@ const branchController = require('./branch.controller');
 const verifyToken = require('../../utils/services/verifyToken');
 
 
-// GET /branches?businessId= (get branches by business)
-router.get('/', verifyToken(), branchController.getBranchesByBusiness);
+// GET /branches (get branches by user in sesion) | /branches?businessId= (get branches by business)
+router.get('/', verifyToken(), branchController.getBranches);
 
 // GET /branches/all (list all branches)
 router.get('/all', verifyToken(), branchController.getAllBranches);

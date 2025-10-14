@@ -1,5 +1,6 @@
 
 const {
+    getBranchesByUser,
     getBranchesByBusiness,
     getAllBranches,
     getBranchById,
@@ -7,6 +8,10 @@ const {
     updateBranch,
     deleteBranch,
 } = require("./branch.db");
+
+exports.getBranchesByUser = async (userId) => {
+    return await getBranchesByUser(userId);
+};
 
 exports.getBranchesByBusiness = async (businessId) => {
     return await getBranchesByBusiness(businessId);

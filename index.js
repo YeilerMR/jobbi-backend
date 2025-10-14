@@ -11,6 +11,8 @@ const businessRoutes = require('./src/modules/business/business.routes');
 const serviceRoutes = require('./src/modules/service/service.routes');
 const branchRoutes = require('./src/modules/branch/branch.routes');
 const invitationRoutes = require('./src/modules/invitation/invitation.routes');
+const notificationsRoutes = require('./src/modules/notifications/notifications.routes');
+
 
 // --------------------------------------
 // ----------- AUTH ROUTES --------------
@@ -36,11 +38,23 @@ app.use('/branches', branchRoutes);
 // ----------- INVITATIONS ROUTES -------
 // --------------------------------------
 app.use('/invitations', invitationRoutes);
+// ------------------------------
+// ---- NOTIFICATIONS ROUTES ----
+// ------------------------------
+app.use('/notifications', notificationsRoutes);
 
 app.get('/', (req, res) => {
   res.send('Jobbi desde Express!');
 });
 
-app.listen(config.bknd_port, () => {
-  console.log(`Servidor escuchando en http://localhost:${config.bknd_port}`);
+// Crear HTTP server para integrar Socket.IO
+const http = require('http');
+const server = http.createServer(app);
+
+// Inicializar gateway de notificaciones (Socket.IO)
+const { init } = require('./src/modules/notifications/notifications.gateway');
+init(server);
+
+server.listen(config.bknd_port, () => {
+  console.log(`Server listening at http://localhost:${config.bknd_port}`);
 });
