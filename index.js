@@ -10,6 +10,7 @@ const authRoutes = require('./src/modules/auth/auth.routes');
 const businessRoutes = require('./src/modules/business/business.routes');
 const serviceRoutes = require('./src/modules/service/service.routes');
 const branchRoutes = require('./src/modules/branch/branch.routes');
+const specialtysRoutes = require('./src/modules/specialtys/specialtys.routes');
 const invitationRoutes = require('./src/modules/invitation/invitation.routes');
 const notificationsRoutes = require('./src/modules/notifications/notifications.routes');
 
@@ -33,6 +34,11 @@ app.use('/services', serviceRoutes);
 // ----------- BRANCH ROUTES ------------
 // --------------------------------------
 app.use('/branches', branchRoutes);
+
+// ------------------------------
+// ---- SPECIALTYS ROUTES -------
+// ------------------------------
+app.use('/specialtys', specialtysRoutes);
 
 // --------------------------------------
 // ----------- INVITATIONS ROUTES -------
