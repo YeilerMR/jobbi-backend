@@ -13,7 +13,8 @@ const {
 
 exports.createService = async (userId, serviceData) => {
   const { id_branch, id_specialty, name, description, price, duration } = serviceData;
-
+  console.log('id de la peticion: ', userId);
+  
   // 1. Get the branch and its business
   const branch = await findBranchById(id_branch);
   if (!branch || branch.state_branch !== 1) {
@@ -21,7 +22,7 @@ exports.createService = async (userId, serviceData) => {
   }
 
   const business = await findBusinessById(branch.id_business);
-  if (!business || business.id_user_admin !== userId || business.state_business !== 1) {
+  if (!business || business.id_user_admin !== userId ) {//|| business.state_business !== 1
     throw new Error("Unauthorized: Branch does not belong to user.");
   }
 
