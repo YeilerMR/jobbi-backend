@@ -1,6 +1,6 @@
 # Secrets
 credentials.json
-secrets.txt
+secretos.txt
 # Node modules
 node_modules/
 
