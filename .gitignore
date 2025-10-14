@@ -1,5 +1,7 @@
 # Node modules
 node_modules/
+credentials.json
+secretos.txt
 
 # Logs
 logs/
