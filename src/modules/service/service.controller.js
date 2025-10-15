@@ -60,3 +60,31 @@ exports.deleteService = async (req, res) => {
     res.status(403).json({ success: false, message: err.message });
   }
 };
+
+exports.getServicesByUser = async (req, res) => {
+  const userId = req.user.id_user;
+  const userRole = req.user.id_rol;
+
+  if (!userId) {
+    res.status(403).json({
+      succes: false,
+      message: "Session is expired. Please login and try again."
+    });
+    return;
+  }
+
+  if (userRole !== 1) {
+    res.status(403).json({
+      succes: false,
+      message: "Access denied. Invalid user role type."
+    });
+    return;
+  }
+
+  const services = await serviceService.getServicesByUser(userId);
+
+  res.status(200).json({
+    success: true,
+    data: services
+  });
+}

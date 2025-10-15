@@ -77,10 +77,36 @@ async function findServiceById(id_service) {
   return rows[0];
 }
 
+async function findServicesByUser(id_user) {
+  const connection = await createConnection();
+
+  const [rows] = await connection.execute(
+    `SELECT 
+        s.id_service,
+        s.id_branch,
+        s.id_specialty,
+        s.name,
+        s.description,
+        s.price,
+        s.duration,
+        s.state_service
+    FROM Service s
+    JOIN Branch b ON s.id_branch = b.id_branch
+    JOIN Business bu ON b.id_business = bu.id_business
+    JOIN User u ON bu.id_user_admin = u.id_user
+    WHERE u.id_user = ?;
+    `, [id_user]
+  );
+
+  await connection.end();
+  return rows;
+}
+
 module.exports = {
   insertService,
   findServicesByBranchId,
   updateServiceById,
   softDeleteServiceById,
   findServiceById,
+  findServicesByUser
 };
