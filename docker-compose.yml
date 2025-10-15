@@ -6,6 +6,7 @@ services:
     # Solo monta el código fuente, no node_modules
     volumes:
       - .:/app
+      - /app/node_modules
     environment:
       - NODE_ENV=development
     env_file:
