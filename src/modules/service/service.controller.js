@@ -60,3 +60,23 @@ exports.deleteService = async (req, res) => {
     res.status(403).json({ success: false, message: err.message });
   }
 };
+
+exports.getServicesByUser = async (req, res) => {
+  const userId = req.user.id_user;
+  const userRole = req.user.id_rol;
+
+  if (!userId || !userRole) {
+    res.status(403).json({
+      succes: false,
+      message: "Session is expired. Please login and try again."
+    });
+    return;
+  }
+
+  const services = await serviceService.getServicesByUser(userId);
+
+  res.status(200).json({
+    success: true,
+    data: services
+  });
+}

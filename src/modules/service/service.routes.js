@@ -6,6 +6,7 @@ const verifyToken = require('../../utils/services/verifyToken');
 // POST /services - Create a service (branch must belong to user)
 router.post('/', verifyToken(), serviceController.createService);
 router.get('/:branchId', verifyToken(), serviceController.getServicesByBranch);
+router.get('/', verifyToken(), serviceController.getServicesByUser);
 router.put('/:id', verifyToken(), serviceController.updateService);
 router.delete('/:id', verifyToken(), serviceController.deleteService);
 

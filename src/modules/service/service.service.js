@@ -8,7 +8,8 @@ const {
   findServicesByBranchId,
   updateServiceById,
   softDeleteServiceById,
-  findServiceById
+  findServiceById,
+  findServicesByUser
 } = require('./service.db');
 
 exports.createService = async (userId, serviceData) => {
@@ -82,3 +83,6 @@ exports.deleteService = async (userId, id_service) => {
   return true;
 };
 
+exports.getServicesByUser = async (userId) => {
+  return await findServicesByUser(userId);
+}
