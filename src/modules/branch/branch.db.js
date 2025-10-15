@@ -61,13 +61,19 @@ async function createBranch(branch) {
 }
 
 async function updateBranch(id_branch, branch) {
-    const connection = await createConnection();
-    const [result] = await connection.execute(
-        `UPDATE ${tbBranch} SET name = ?, location = ?, phone = ?, email = ? WHERE id_branch = ? AND state_branch = 1`,
-        [branch.name, branch.location, branch.phone, branch.email, id_branch]
-    );
-    await connection.end();
-    return result.affectedRows > 0;
+    try {
+        const connection = await createConnection();
+
+        const [result] = await connection.execute(
+            `UPDATE ${tbBranch} SET id_business = ?, name = ?, location = ?, phone = ?, email = ?, state_branch = ? WHERE id_branch = ?`,
+            [branch.id_business, branch.name, branch.location, branch.phone, branch.email, branch.state_branch, id_branch]
+        );
+        await connection.end();
+        return result.affectedRows > 0;
+    } catch (err) {
+        console.error("SQL Error:", err);
+        return false;
+    }
 }
 
 async function deleteBranch(id_branch) {
@@ -77,6 +83,16 @@ async function deleteBranch(id_branch) {
     );
     await connection.end();
     return result.affectedRows > 0;
+}
+
+async function isActive(id_branch) {
+    const connection = await createConnection();
+    const [result] = await connection.execute(
+        `SELECT * FROM ${tbBranch} WHERE id_branch = ? AND state_branch = 1`,
+        [id_branch]
+    );
+    await connection.end();
+    return result.length > 0;
 }
 
 module.exports = {

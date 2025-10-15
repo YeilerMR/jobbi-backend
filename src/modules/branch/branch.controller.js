@@ -66,11 +66,12 @@ exports.createBranch = async (req, res) => {
 exports.updateBranch = async (req, res) => {
     try {
         const id_branch = req.params.id;
-        const { name, location, phone, email } = req.body;
+        const {id_business, name, location, phone, email, state_branch } = req.body;
         if (!name || !location || !phone || !email) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
-        const branch = { name, location, phone, email };
+        const branch = {id_business, name, location, phone, email, state_branch };
+
         const updated = await branchService.updateBranch(id_branch, branch);
         if (!updated) {
             return res.status(404).json({ success: false, message: "Branch not found or not updated" });
