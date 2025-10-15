@@ -3,6 +3,9 @@ credentials.json
 secretos.txt
 # Node modules
 node_modules/
+credentials.json
+secretos.txt
+token.json
 
 # Logs
 logs/
