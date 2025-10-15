@@ -65,10 +65,18 @@ exports.getServicesByUser = async (req, res) => {
   const userId = req.user.id_user;
   const userRole = req.user.id_rol;
 
-  if (!userId || !userRole) {
+  if (!userId) {
     res.status(403).json({
       succes: false,
       message: "Session is expired. Please login and try again."
+    });
+    return;
+  }
+
+  if (userRole !== 1) {
+    res.status(403).json({
+      succes: false,
+      message: "Access denied. Invalid user role type."
     });
     return;
   }
