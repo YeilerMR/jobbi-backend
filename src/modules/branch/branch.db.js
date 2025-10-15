@@ -26,7 +26,7 @@ async function getBranchesByUser(userId) {
 async function getBranchesByBusiness(businessId) {
     const connection = await createConnection();
     const [rows] = await connection.execute(
-        `SELECT id_branch, id_business, name, location, phone, email, state_branch FROM ${tbBranch} WHERE id_business = ? AND state_branch = 1`, [businessId]
+        `SELECT id_branch, id_business, name, location, phone, email, state_branch FROM ${tbBranch} WHERE id_business = ?`, [businessId]
     );
     await connection.end();
     return rows;
