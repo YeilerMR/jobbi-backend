@@ -27,9 +27,11 @@ exports.listEmployees = async (filters) => {
 
     const [rows] = await conn.execute(
       `SELECT e.id_employee, e.id_branch, e.id_user, e.availability,
-              u.name, u.last_name, u.email, u.phone
+              u.name, u.last_name, u.email, u.phone,
+              br.name AS branch_name
        FROM \`Employee\` e
        INNER JOIN \`User\` u ON e.id_user = u.id_user
+       LEFT JOIN \`Branch\` br ON e.id_branch = br.id_branch
        ${whereSql} 
        LIMIT ? OFFSET ?`,
       [...args, limit, offset]
@@ -71,9 +73,11 @@ exports.getEmployeeById = async (id) => {
   try {
     const [rows] = await conn.execute(
       `SELECT e.id_employee, e.id_branch, e.id_user, e.availability,
-              u.name, u.last_name, u.email, u.phone
+              u.name, u.last_name, u.email, u.phone,
+              br.name AS branch_name
        FROM \`Employee\` e
        INNER JOIN \`User\` u ON e.id_user = u.id_user
+       LEFT JOIN \`Branch\` br ON e.id_branch = br.id_branch
        WHERE e.id_employee = ? LIMIT 1`,
       [id]
     );

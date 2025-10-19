@@ -12,6 +12,7 @@ class Employee {
   }) {
     this.id_employee = id_employee;
     this.id_branch = id_branch;
+    this.branch_name = branch_name; // Branch name right after id_branch
     this.id_user = id_user;
     this.availability = availability; // 0=busy, 1=available, 2=partially_available
     // User information
@@ -19,10 +20,6 @@ class Employee {
     this.last_name = last_name;
     this.email = email;
     this.phone = phone;
-    // Branch information (optional)
-    if (branch_name) {
-      this.branch_name = branch_name;
-    }
   }
 }
 
