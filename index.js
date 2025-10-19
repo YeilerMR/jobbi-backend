@@ -16,6 +16,7 @@ const invitationRoutes = require('./src/modules/invitation/invitation.routes');
 const notificationsRoutes = require('./src/modules/notifications/notifications.routes');
 //const appointmentsRoutes = require('./src/modules/appointments/appointments.routes'); // TODO: Create appointments module
 const employeesRoutes = require('./src/modules/employees/employees.routes');
+const usersRoutes = require('./src/modules/users/users.routes');
 
 
 // --------------------------------------
@@ -65,6 +66,11 @@ app.use('/notifications', notificationsRoutes);
 // ---- EMPLOYEES ROUTES --------
 // ------------------------------
 app.use('/employees', employeesRoutes);
+
+// ------------------------------
+// ---- USERS ROUTES ------------
+// ------------------------------
+app.use('/users', usersRoutes);
 
 app.get('/', (req, res) => {
   res.send('Jobbi desde Express!');
