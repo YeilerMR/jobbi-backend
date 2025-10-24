@@ -8,10 +8,10 @@ async function getBranchesByUser(userId) {
         `SELECT 
             b.id_branch,
             b.id_business,
-            b.name AS branch_name,
-            b.location AS branch_location,
-            b.phone AS branch_phone,
-            b.email AS branch_email,
+            b.name,
+            b.location,
+            b.phone,
+            b.email,
             b.state_branch
         FROM Branch b
         JOIN Business bs ON b.id_business = bs.id_business

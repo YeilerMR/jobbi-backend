@@ -15,7 +15,13 @@ const specialtysRoutes = require('./src/modules/specialtys/specialtys.routes');
 const invitationRoutes = require('./src/modules/invitation/invitation.routes');
 const notificationsRoutes = require('./src/modules/notifications/notifications.routes');
 const appointmentsRoutes = require('./src/modules/appointments/appointments.routes');
+<<<<<<< HEAD
 const giftsRoutes = require("./src/modules/gift/gift.routes");
+=======
+//const appointmentsRoutes = require('./src/modules/appointments/appointments.routes'); // TODO: Create appointments module
+const employeesRoutes = require('./src/modules/employees/employees.routes');
+const usersRoutes = require('./src/modules/users/users.routes');
+>>>>>>> aa7de40ac57a752e489990cd801fdaf4f0b0defa
 
 
 // --------------------------------------
@@ -64,6 +70,20 @@ app.use('/appointments', appointmentsRoutes);
 // ----------- GIFTS ROUTES -------------
 // --------------------------------------
 app.use('/gifts', giftsRoutes);
+// ------------------------------
+// ---- APPOINTMENTS ROUTES -----
+// ------------------------------
+ //app.use('/appointments', appointmentsRoutes); // TODO: Create appointments module
+
+// ------------------------------
+// ---- EMPLOYEES ROUTES --------
+// ------------------------------
+app.use('/employees', employeesRoutes);
+
+// ------------------------------
+// ---- USERS ROUTES ------------
+// ------------------------------
+app.use('/users', usersRoutes);
 
 app.get('/', (req, res) => {
   res.send('Jobbi desde Express!');
