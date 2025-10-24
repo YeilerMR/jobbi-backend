@@ -18,6 +18,7 @@ const appointmentsRoutes = require('./src/modules/appointments/appointments.rout
 //const appointmentsRoutes = require('./src/modules/appointments/appointments.routes'); // TODO: Create appointments module
 const employeesRoutes = require('./src/modules/employees/employees.routes');
 const usersRoutes = require('./src/modules/users/users.routes');
+const giftsRoutes = require('./src/modules/gifts/gifts.routes');
 
 
 // --------------------------------------
@@ -76,6 +77,10 @@ app.use('/employees', employeesRoutes);
 // ---- USERS ROUTES ------------
 // ------------------------------
 app.use('/users', usersRoutes);
+// ------------------------------
+// ---- GIFTS ROUTES ----------
+// ------------------------------
+app.use('/gifts', giftsRoutes);
 
 app.get('/', (req, res) => {
   res.send('Jobbi desde Express!');
