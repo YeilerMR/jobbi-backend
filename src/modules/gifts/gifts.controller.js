@@ -77,3 +77,44 @@ exports.listUserGifts = async (req, res) => {
     return res.status(400).json({ success: false, message: err.message });
   }
 };
+
+exports.createAssociationUserGift = async (req, res) => {
+    try {
+        const userId = req.user.id_user;
+        const giftId = req.params.giftId;
+
+        const creation = await service.createAssociationUserGift(userId, giftId);
+
+        res.status(201).json({
+            success: true,
+            data: creation
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.updateUserGiftStatus = async (req, res) => {
+    try {
+        const userId = req.user.id_user;
+        const giftId = req.params.giftId;
+
+        const updateStatus = await service.updateUserGiftStatus(userId, giftId);
+
+        if (!updateStatus || updateStatus.activatedRows === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "The gift couldn't be activated. Please try again later."
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Reward activated successfully. You can use it for your next appointment!",
+            data: updateStatus
+        });
+
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
