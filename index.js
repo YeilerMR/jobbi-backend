@@ -14,6 +14,7 @@ const calendarRoutes = require('./src/modules/calendar/calendar.routes');
 const specialtysRoutes = require('./src/modules/specialtys/specialtys.routes');
 const invitationRoutes = require('./src/modules/invitation/invitation.routes');
 const notificationsRoutes = require('./src/modules/notifications/notifications.routes');
+const appointmentsRoutes = require('./src/modules/appointments/appointments.routes');
 //const appointmentsRoutes = require('./src/modules/appointments/appointments.routes'); // TODO: Create appointments module
 const employeesRoutes = require('./src/modules/employees/employees.routes');
 const usersRoutes = require('./src/modules/users/users.routes');
@@ -56,6 +57,10 @@ app.use('/invitations', invitationRoutes);
 // ---- NOTIFICATIONS ROUTES ----
 // ------------------------------
 app.use('/notifications', notificationsRoutes);
+// --------------------------------------
+// ----------- APPOINTMENTS ROUTES ------
+// --------------------------------------
+app.use('/appointments', appointmentsRoutes);
 
 // ------------------------------
 // ---- APPOINTMENTS ROUTES -----
