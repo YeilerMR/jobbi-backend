@@ -6,12 +6,20 @@ async function createAssociationUserGift(userId, giftId) {
         connection = await createConnection();
 
         const userPoints = await getPointsByUser(userId);
+
+        const totalPoints = userPoints.total_points;
+        const redeemedPoints = userPoints.redeemed_points;
+
         const giftPoints = await getPointsByGift(giftId);
-        const pointsLeft = userPoints - giftPoints;
+        const pointsLeft = totalPoints - giftPoints;
 
         if (pointsLeft < 0) {
             throw new Error("You don't have enough points to redeem this reward. Don't give up!");
         }
+
+        let totalRedeemedPoints = redeemedPoints + giftPoints;
+
+        await updateUserPoints(userId, pointsLeft, totalRedeemedPoints);
 
         const [result] = await connection.execute(
             `
@@ -32,6 +40,24 @@ async function createAssociationUserGift(userId, giftId) {
         throw error;
     } finally {
         if (connection) await connection.end();
+    }
+}
+
+async function updateUserPoints(userId, totalPoints, totalRedeemedPoints) {
+    const connection = await createConnection();
+    try {
+        const [result] = await connection.execute(
+            `
+            UPDATE ClientPoints 
+            SET total_points = ?, redeemed_points = ?, last_update = NOW() 
+            WHERE id_user = ?
+            `,
+            [totalPoints, totalRedeemedPoints, userId]
+        );
+
+        return result.affectedRows > 0; // returns true if updated successfully
+    } finally {
+        await connection.end();
     }
 }
 
@@ -75,13 +101,13 @@ async function getPointsByUser(userId) {
     const connection = await createConnection();
     try {
         const [rows] = await connection.execute(
-            `SELECT total_points FROM ClientPoints WHERE id_user = ?`,
+            `SELECT total_points, redeemed_points FROM ClientPoints WHERE id_user = ?`,
             [userId]
         );
 
         if (!rows.length) throw new Error("User not found in ClientPoints");
 
-        return rows[0].total_points;
+        return rows[0];
     } finally {
         await connection.end();
     }
