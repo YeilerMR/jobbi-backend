@@ -65,7 +65,7 @@ exports.getBusinessById = async (userId, businessId) => {
 exports.updateBusiness = async (userId, businessId, updateData) => {
   const business = await findBusinessById(businessId);
 
-  if (!business || business.id_user_admin !== userId || business.state_business !== 1) {
+  if (!business || business.id_user_admin !== userId ) {//|| business.state_business !== 1
     return null;
   }
 
