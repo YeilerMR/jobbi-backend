@@ -63,6 +63,10 @@ app.use('/notifications', notificationsRoutes);
 // --------------------------------------
 app.use('/appointments', appointmentsRoutes);
 
+// --------------------------------------
+// ----------- GIFTS ROUTES -------------
+// --------------------------------------
+app.use('/gifts', giftsRoutes);
 // ------------------------------
 // ---- APPOINTMENTS ROUTES -----
 // ------------------------------

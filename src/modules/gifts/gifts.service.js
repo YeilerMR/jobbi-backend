@@ -39,3 +39,11 @@ exports.getUserGifts = async (id_user) => {
   const rows = await db.listUserGifts(id_user);
   return rows || [];
 };
+
+exports.createAssociationUserGift = async (userId, giftId) => {
+    return await db.createAssociationUserGift(userId, giftId);
+}
+
+exports.updateUserGiftStatus = async (userId, giftId) => {
+    return await db.updateUserGiftStatus(userId, giftId);
+}
