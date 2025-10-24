@@ -15,6 +15,7 @@ const specialtysRoutes = require('./src/modules/specialtys/specialtys.routes');
 const invitationRoutes = require('./src/modules/invitation/invitation.routes');
 const notificationsRoutes = require('./src/modules/notifications/notifications.routes');
 const appointmentsRoutes = require('./src/modules/appointments/appointments.routes');
+const giftsRoutes = require("./src/modules/gift/gift.routes");
 
 
 // --------------------------------------
@@ -58,6 +59,11 @@ app.use('/notifications', notificationsRoutes);
 // ----------- APPOINTMENTS ROUTES ------
 // --------------------------------------
 app.use('/appointments', appointmentsRoutes);
+
+// --------------------------------------
+// ----------- GIFTS ROUTES -------------
+// --------------------------------------
+app.use('/gifts', giftsRoutes);
 
 app.get('/', (req, res) => {
   res.send('Jobbi desde Express!');
