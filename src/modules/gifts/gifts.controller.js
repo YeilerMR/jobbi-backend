@@ -1,13 +1,14 @@
 const service = require('./gifts.service');
 const { getUserById } = require('../user/user.db');
 
-// GET /gifts/:id_user
+// GET /gifts/points (returns points for the logged-in user)
+// Note: this controller reads the user id from the JWT (req.user)
 exports.getGifts = async (req, res) => {
   try {
+    const requester = req.user; // provided by verifyToken()
+    const id_user = requester && requester.id_user;
 
-  const id_user = requester && requester.id_user;
-
-    // Authorization: allow if requester is admin or requesting their own gifts
+    // Authorization: require authenticated requester
     if (!requester) {
       console.log('Unauthorized request to get gifts');
       return res.status(401).json({ success: false, message: 'Unauthorized' });
