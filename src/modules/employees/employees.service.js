@@ -1,4 +1,5 @@
 const db = require('./employees.db');
+const appointmentsDb = require('../appointments/appointments.db');
 const { Employee, availabilityToColor } = require('./employees.model');
 
 // Create employee with validation
@@ -205,4 +206,31 @@ exports.getSchedule = async (id_employee) => {
   }
 
   return await db.getSchedule(id_employee);
+};
+
+// Get appointments for a specific day for the employee that belongs to the given user id
+exports.getAppointmentsForDay = async (id_user, date) => {
+  if (!id_user) {
+    throw new Error('User ID is required');
+  }
+  if (!date) {
+    throw new Error('Date is required');
+  }
+
+  // basic YYYY-MM-DD validation
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error('Invalid date format. Use YYYY-MM-DD');
+  }
+
+  // Find employee by user id
+  const employee = await db.getEmployeeByUserId(id_user);
+  // If the user is not associated to an Employee record, return empty result
+  // instead of throwing so the client receives an empty appointments list.
+  if (!employee) {
+    return { rows: [], total: 0 };
+  }
+
+  // Use appointments module to list appointments for that employee on the given date
+  const result = await appointmentsDb.listAppointments({ id_employee: employee.id_employee, date });
+  return result;
 };

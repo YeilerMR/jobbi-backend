@@ -41,5 +41,31 @@ function verifyAdmin(origin = null) {
   };
 }
 
+// Middleware to verify employee role (id_rol === 3)
+function verifyEmployee(origin = null) {
+  return (req, res, next) => {
+    const user = getAuthUser(req, origin);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Invalid or expired token"
+      });
+    }
+
+    // Check if user has employee role (id_rol === 3)
+    if (user.id_rol !== 3) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Employee access required"
+      });
+    }
+
+    req.user = user;
+    next();
+  };
+}
+
 module.exports = verifyToken;
 module.exports.verifyAdmin = verifyAdmin;
+module.exports.verifyEmployee = verifyEmployee;
