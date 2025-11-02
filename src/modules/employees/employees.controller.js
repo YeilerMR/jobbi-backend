@@ -191,3 +191,41 @@ exports.getSchedule = async (req, res) => {
     });
   }
 };
+
+// Get appointments for a specific day for the authenticated employee
+exports.getAppointmentsForDay = async (req, res) => {
+  try {
+    // req.user is set by verifyToken() middleware
+    const id_user = req.user?.id_user;
+    const date = req.query.date;
+
+    const result = await service.getAppointmentsForDay(id_user, date);
+
+      // If there are no appointments, return an informative message but still 200
+      if (!result || !Array.isArray(result.rows) || result.total === 0) {
+        return res.status(200).json({
+          success: true,
+          message: 'No appointments found for the specified date',
+          data: [],
+          total: 0
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Appointments retrieved successfully',
+        data: result.rows,
+        total: result.total
+      });
+  } catch (error) {
+    console.error('Error getting appointments for day:', error);
+    // Basic error mapping
+    if (error.message && (error.message.includes('required') || error.message.includes('Invalid'))) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.message && error.message.toLowerCase().includes('not found')) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
