@@ -239,3 +239,79 @@ exports.updateUserGiftStatus = async (userId, giftId) => {
     if (connection) await connection.end();
   }
 }
+
+// Export helper to fetch a User_Gift by its id (used by controllers/services)
+exports.getGiftUserByUserGift = getGiftUserByUserGift;
+
+// Persist a generated token to an existing User_Gift record
+exports.createTokenForUserGift = async (id_user_gift, token, expires_at, generated_by) => {
+  const connection = await createConnection();
+  try {
+    const [result] = await connection.execute(
+      `UPDATE User_Gift
+       SET token = ?, token_expires_at = ?, token_created_at = NOW(), token_used = 0, token_generated_by = ?
+       WHERE id_user_gift = ?`,
+      [token, expires_at || null, generated_by || null, id_user_gift]
+    );
+
+    if (result.affectedRows === 0) return null;
+
+    const [rows] = await connection.execute(
+      `SELECT ug.*, g.name AS gift_name, g.description AS gift_description, g.discount, g.reward_type
+       FROM User_Gift ug
+       LEFT JOIN Gifts g ON ug.id_gift = g.id_gift
+       WHERE ug.id_user_gift = ? LIMIT 1`,
+      [id_user_gift]
+    );
+
+    return rows[0] || null;
+  } finally {
+    await connection.end();
+  }
+};
+
+// Find a User_Gift by token (prefer tokens stored in User_Gift)
+exports.getUserGiftByToken = async (token) => {
+  const connection = await createConnection();
+  try {
+    const [rows] = await connection.execute(
+      `SELECT ug.*, g.name AS gift_name, g.description AS gift_description, g.discount, g.reward_type
+       FROM User_Gift ug
+       LEFT JOIN Gifts g ON ug.id_gift = g.id_gift
+       WHERE ug.token = ? LIMIT 1`,
+      [token]
+    );
+    return rows[0] || null;
+  } finally {
+    await connection.end();
+  }
+};
+
+// Atomically mark the token as used and mark the gift redeemed
+exports.markTokenUsedInUserGift = async (token, used_by) => {
+  const connection = await createConnection();
+  try {
+    // atomic update: only mark if token_used = 0
+    const [result] = await connection.execute(
+      `UPDATE User_Gift
+       SET token_used = 1, token_used_at = NOW(), redeemed = 1
+       WHERE token = ? AND token_used = 0`,
+      [token]
+    );
+
+    if (result.affectedRows === 0) return { affectedRows: 0 };
+
+    // return the updated record
+    const [rows] = await connection.execute(
+      `SELECT ug.*, g.name AS gift_name, g.description AS gift_description, g.discount, g.reward_type
+       FROM User_Gift ug
+       LEFT JOIN Gifts g ON ug.id_gift = g.id_gift
+       WHERE ug.token = ? LIMIT 1`,
+      [token]
+    );
+
+    return { affectedRows: result.affectedRows, record: rows[0] || null };
+  } finally {
+    await connection.end();
+  }
+};
