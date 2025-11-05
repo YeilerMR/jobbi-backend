@@ -1,6 +1,7 @@
 // services/calendar.service.js
 const { google } = require('googleapis');
 const db = require('./calendar.db');
+const { DateTime } = require('luxon');
 
 /* ============================================================
    GOOGLE CALENDAR METHODS
@@ -133,6 +134,23 @@ exports.getDailyAvailability = async (id_employee, date) => {
     return await db.generateAvailability(id_employee, date);
 };
 
+// Check availability for a specific slot
+exports.checkAvailability = async (id_employee, start, end) => {
+    const availability = await db.generateAvailability(id_employee, start.split('T')[0]);
+
+    const startDT = DateTime.fromISO(start);
+    const endDT = DateTime.fromISO(end);
+
+    // Find conflicting slot
+    const conflict = availability.slots.find(slot => {
+        const slotStart = DateTime.fromISO(slot.start);
+        const slotEnd = DateTime.fromISO(slot.end);
+        return !(endDT <= slotStart || startDT >= slotEnd) && slot.status !== 'available';
+    });
+
+    return { available: !conflict, conflict };
+};
+
 /* ============================================================
    UNIFIED LOGIC (GOOGLE + DB)
    ============================================================ */
@@ -148,13 +166,17 @@ exports.getEvents = async (auth, id_employee) => {
 };
 
 // Create event in both Google and DB
-exports.createEvent = async (auth, id_employee, eventData) => {
+exports.createEvent = async (auth, id_employee, id_branch, id_client, eventData) => {
+    // 1️⃣ Create Google Calendar event
     const googleEvent = await this.createGoogleEvent(auth, eventData);
 
+    // 2️⃣ Store in DB
     if (id_employee) {
         await this.createEventInDB(id_employee, {
             ...eventData,
             google_event_id: googleEvent.id,
+            id_client,
+            id_branch
         });
     }
 

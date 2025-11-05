@@ -23,29 +23,64 @@ exports.createEvent = async (req, res) => {
     try {
         const { id_employee } = req.params;
         const eventData = req.body;
-        const auth = await authorize();
 
-        // 1️⃣ Create in Google Calendar
-        const googleEvent = await calendarService.createGoogleEvent(auth, eventData);
+        // Validate required fields
+        const requiredFields = ['title', 'start', 'end'];
+        for (const field of requiredFields) {
+            if (!eventData[field]) {
+                return res.status(400).json({ success: false, message: `${field} is required` });
+            }
+        }
 
-        // 2️⃣ Store reference in MariaDB (link with employee)
-        if (id_employee) {
-            await calendarService.createEventInDB(id_employee, {
-                ...eventData,
-                google_event_id: googleEvent.id,
+        // Extract IDs
+        const id_client = eventData.client?.id_client || null;
+        const id_branch = eventData.branch?.id_branch || null;
+
+        if (!id_client || !id_branch) {
+            return res.status(400).json({
+                success: false,
+                message: "Both id_client and id_branch are required in the request body."
             });
         }
+
+        // Check availability
+        const availabilityCheck = await calendarService.checkAvailability(
+            id_employee,
+            eventData.start,
+            eventData.end
+        );
+        if (!availabilityCheck.available) {
+            return res.status(409).json({
+                success: false,
+                message: 'The selected time slot is already booked or unavailable',
+                conflictingEvent: availabilityCheck.conflict
+            });
+        }
+
+        // Google Calendar Auth
+        const auth = await authorize();
+
+        // Create event in both Google Calendar and DB
+        const googleEvent = await calendarService.createEvent(
+            auth,
+            id_employee,
+            id_branch,
+            id_client,
+            eventData
+        );
 
         res.status(201).json({
             success: true,
             message: "Event created successfully",
             data: googleEvent,
         });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 exports.updateEvent = async (req, res) => {
     try {
@@ -131,6 +166,10 @@ exports.getDailyAvailability = async (req, res) => {
             data: result,
         });
     } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        console.error("Error generating availability:", error);
+        res.status(400).json({
+            success: false,
+            message: error.message || "Failed to generate availability",
+        });
     }
 };
