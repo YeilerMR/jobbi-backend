@@ -94,7 +94,7 @@ exports.createAssociationUserGift = async (userId, giftId) => {
     const [result] = await connection.execute(
       `
             INSERT INTO User_Gift (id_user, id_gift, gift_date, redeemed, is_active)
-            VALUES (?, ?, NOW(), 1, 0)
+            VALUES (?, ?, NOW(), 0, 0)
             `,
       [userId, giftId]
     );
@@ -308,6 +308,33 @@ exports.markTokenUsedInUserGift = async (token, used_by) => {
        LEFT JOIN Gifts g ON ug.id_gift = g.id_gift
        WHERE ug.token = ? LIMIT 1`,
       [token]
+    );
+
+    return { affectedRows: result.affectedRows, record: rows[0] || null };
+  } finally {
+    await connection.end();
+  }
+};
+
+// Atomically mark a User_Gift as used by id (for flows that don't use a token)
+exports.markUserGiftUsedById = async (id_user_gift, used_by) => {
+  const connection = await createConnection();
+  try {
+    const [result] = await connection.execute(
+      `UPDATE User_Gift
+       SET token_used = 1, token_used_at = NOW(), redeemed = 1
+       WHERE id_user_gift = ? AND token_used = 0`,
+      [id_user_gift]
+    );
+
+    if (result.affectedRows === 0) return { affectedRows: 0 };
+
+    const [rows] = await connection.execute(
+      `SELECT ug.*, g.name AS gift_name, g.description AS gift_description, g.discount, g.reward_type
+       FROM User_Gift ug
+       LEFT JOIN Gifts g ON ug.id_gift = g.id_gift
+       WHERE ug.id_user_gift = ? LIMIT 1`,
+      [id_user_gift]
     );
 
     return { affectedRows: result.affectedRows, record: rows[0] || null };

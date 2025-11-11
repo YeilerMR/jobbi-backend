@@ -1,6 +1,5 @@
 const service = require('./gifts.service');
 const { getUserById } = require('../user/user.db');
-const db = require('./gifts.db');
 
 // GET /gifts/points (returns points for the logged-in user)
 // Note: this controller reads the user id from the JWT (req.user)
@@ -120,39 +119,23 @@ exports.updateUserGiftStatus = async (req, res) => {
     }
 };
 
-// POST /gifts/qr/create -> body: { id_user_gift, expiresMinutes, hostUrl }
-exports.createQRCode = async (req, res) => {
-  try {
-    const requester = req.user;
-    if (!requester) return res.status(401).json({ success: false, message: 'Unauthorized' });
-
-    const { id_user_gift, expiresMinutes, hostUrl } = req.body || {};
-    if (!id_user_gift) return res.status(400).json({ success: false, message: 'id_user_gift is required' });
-
-    // Ensure the user_gift belongs to the requester (security)
-    const userGift = await db.getGiftUserByUserGift(id_user_gift);
-    if (!userGift) return res.status(404).json({ success: false, message: 'User_Gift not found' });
-    if (Number(userGift.id_user) !== Number(requester.id_user)) {
-      return res.status(403).json({ success: false, message: 'Forbidden: cannot create token for another user' });
-    }
-
-    const result = await service.generateQRCodeForUserGift(id_user_gift, { expiresMinutes, hostUrl, generatedBy: requester.id_user, req });
-
-    return res.status(201).json({ success: true, message: 'Token generated', data: result });
-  } catch (err) {
-    console.error('Error in createQRCode:', err);
-    return res.status(400).json({ success: false, message: err.message });
-  }
-};
+// NOTE: /gifts/qr/create endpoint removed — token generation performed elsewhere or disabled
 
 // POST /gifts/qr/validate -> body: { token, markUsed }
 exports.validateQRCode = async (req, res) => {
   try {
     const requester = req.user || null; // may be unauthenticated scanner
-    const { token, markUsed } = req.body || {};
-    if (!token) return res.status(400).json({ success: false, message: 'token is required' });
+    const { token, markUsed, id_user_gift } = req.body || {};
 
-    const result = await service.validateQRCode(token, { markUsed: !!markUsed, usedBy: requester ? requester.id_user : null });
+    if (!token && !id_user_gift) return res.status(400).json({ success: false, message: 'token or id_user_gift is required' });
+
+    let result;
+    if (token) {
+      result = await service.validateQRCode(token, { markUsed: !!markUsed, usedBy: requester ? requester.id_user : null });
+    } else {
+      // validate by user_gift id (flow from /gifts/assoc)
+      result = await service.validateUserGiftById(id_user_gift, { markUsed: !!markUsed, usedBy: requester ? requester.id_user : null });
+    }
 
     if (!result.valid) return res.status(400).json({ success: false, message: result.reason, data: result.record });
 
