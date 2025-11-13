@@ -3,7 +3,12 @@ const service = require('./employees.service');
 // Create employee
 exports.createEmployee = async (req, res) => {
   try {
-    const employee = await service.createEmployee(req.body);
+    // Authorization check
+    if (!req.user || req.user.id_rol != 1) {
+      return res.status(405).json({ success: false, message: "Method Not Allowed" });
+    }
+    
+    const employee = await service.createEmployee(req.user.id_user, req.body);
     res.status(201).json({
       success: true,
       message: 'Employee created successfully',
@@ -11,6 +16,14 @@ exports.createEmployee = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating employee:', error);
+    // Manejar error de límite de plan
+    if (error.status === 403) {
+      return res.status(403).json({ 
+        success: false, 
+        message: error.message,
+        details: error.details
+      });
+    }
     res.status(400).json({
       success: false,
       message: error.message
