@@ -1,8 +1,9 @@
 const db = require('./employees.db');
 const { Employee, availabilityToColor } = require('./employees.model');
+const subscriptionService = require("../subscriptions/subscriptions.service");
 
 // Create employee with validation
-exports.createEmployee = async (data) => {
+exports.createEmployee = async (userId, data) => {
   const { id_branch, id_user, availability = 1 } = data;
 
   // Validate required fields
@@ -23,6 +24,19 @@ exports.createEmployee = async (data) => {
   const branch = await db.ensureBranchActive(id_branch);
   if (!branch) {
     throw new Error('Branch not found or inactive');
+  }
+
+  // Validar límites del plan antes de crear el empleado
+  const validation = await subscriptionService.canCreateEmployee(userId, id_branch);
+  
+  if (!validation.allowed) {
+    const error = new Error(validation.message);
+    error.status = 403; // Forbidden
+    error.details = {
+      currentCount: validation.currentCount,
+      limit: validation.limit
+    };
+    throw error;
   }
 
   // Validate availability (0=busy, 1=available, 2=partial)
