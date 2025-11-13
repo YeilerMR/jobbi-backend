@@ -33,7 +33,7 @@ exports.createEvent = async (req, res) => {
         }
 
         // Extract IDs
-        const id_client = eventData.client?.id_client || null;
+        const id_client = req.user.id_user || null;
         const id_branch = eventData.branch?.id_branch || null;
 
         if (!id_client || !id_branch) {
