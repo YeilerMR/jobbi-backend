@@ -80,7 +80,6 @@ async function findBusinessById(businessId) {
   );
 
   await connection.end();
-  //console.log(rows[0]);
   
   return rows[0];
 }

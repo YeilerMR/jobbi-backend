@@ -10,7 +10,6 @@ exports.getBranches = async (req, res) => {
         const { businessId } = req.query;
         let userBranches;
 
-        console.log(businessId);
         if (businessId) {
             userBranches = await branchService.getBranchesByBusiness(businessId);
         } else {

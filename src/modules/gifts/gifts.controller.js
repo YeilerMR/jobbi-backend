@@ -10,7 +10,6 @@ exports.getGifts = async (req, res) => {
 
     // Authorization: require authenticated requester
     if (!requester) {
-      console.log('Unauthorized request to get gifts');
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
@@ -18,12 +17,10 @@ exports.getGifts = async (req, res) => {
     // Validate that the requested user (from JWT) exists
     const userExists = await getUserById(id_user);
     if (!userExists) {
-      console.log(`User ${id_user} not found`);
       return res.status(404).json({ success: false, message: 'That user does not exist' });
     }
 
     const gifts = await service.getGiftsForUser(id_user);
-    console.log(`Gifts retrieved for user ${id_user}`);
     return res.json({ success: true, message: 'Gifts retrieved successfully', data: gifts });
   } catch (err) {
     console.error('Error in getGifts:', err);
@@ -45,7 +42,6 @@ exports.listAvailableByRole = async (req, res) => {
     }
 
     const gifts = await service.getAvailableGiftsForRole(roleId);
-    console.log(`Available gifts listed for role ${roleId}`);
     return res.json({ success: true, message: 'Available gifts retrieved successfully', data: gifts });
   } catch (err) {
     console.error('Error in listAvailableByRole:', err);
@@ -70,7 +66,6 @@ exports.listUserGifts = async (req, res) => {
     }
 
     const rows = await service.getUserGifts(id_user);
-    console.log(`User gifts listed for user ${id_user}`);
     return res.json({ success: true, message: 'User gifts retrieved successfully', data: rows });
   } catch (err) {
     console.error('Error in listUserGifts:', err);

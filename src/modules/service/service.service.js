@@ -15,7 +15,6 @@ const {
 
 exports.createService = async (userId, serviceData) => {
   const { id_branch, id_specialty, name, description, price, duration } = serviceData;
-  console.log('id de la peticion: ', userId);
   
   // 1. Get the branch and its business
   const branch = await findBranchById(id_branch);
