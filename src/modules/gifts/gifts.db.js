@@ -61,7 +61,7 @@ exports.listUserGifts = async (id_user) => {
               g.name AS gift_name, g.description AS gift_description, g.for_role, g.min_points, g.is_active
        FROM User_Gift ug
        LEFT JOIN Gifts g ON ug.id_gift = g.id_gift
-       WHERE ug.id_user = ?`,
+       WHERE ug.id_user = ? AND ug.is_active = 0`,
       [id_user]
     );
     return rows;
@@ -320,9 +320,15 @@ exports.markTokenUsedInUserGift = async (token, used_by) => {
 exports.markUserGiftUsedById = async (id_user_gift, used_by) => {
   const connection = await createConnection();
   try {
+    // const [result] = await connection.execute(
+    //   `UPDATE User_Gift
+    //    SET token_used = 1, token_used_at = NOW(), redeemed = 1
+    //    WHERE id_user_gift = ? AND token_used = 0`,
+    //   [id_user_gift]
+    // );
     const [result] = await connection.execute(
       `UPDATE User_Gift
-       SET token_used = 1, token_used_at = NOW(), redeemed = 1
+       SET token_used = 1, token_used_at = NOW(), redeemed = 1, is_active = 1
        WHERE id_user_gift = ? AND token_used = 0`,
       [id_user_gift]
     );

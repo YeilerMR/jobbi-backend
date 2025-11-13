@@ -118,9 +118,9 @@ exports.validateUserGiftById = async (id_user_gift, opts = {}) => {
   }
 
   // No token in the row: validate by id and optionally mark used/redeemed
-  if (userGift.token_used === 1 || userGift.redeemed === 1) {
-    return { valid: false, reason: 'Already redeemed', record: userGift };
-  }
+  // if (userGift.token_used === 1 || userGift.redeemed === 1) {
+  //   return { valid: false, reason: 'Already redeemed', record: userGift };
+  // }
 
   if (opts.markUsed) {
     const res = await db.markUserGiftUsedById(id_user_gift, opts.usedBy || null);
