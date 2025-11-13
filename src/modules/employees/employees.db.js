@@ -87,6 +87,26 @@ exports.getEmployeeById = async (id) => {
   }
 };
 
+// Get employee by user id
+exports.getEmployeeByUserId = async (id_user) => {
+  const conn = await createConnection();
+  try {
+    const [rows] = await conn.execute(
+      `SELECT e.id_employee, e.id_branch, e.id_user, e.availability,
+              u.name, u.last_name, u.email, u.phone,
+              br.name AS branch_name
+       FROM \`Employee\` e
+       INNER JOIN \`User\` u ON e.id_user = u.id_user
+       LEFT JOIN \`Branch\` br ON e.id_branch = br.id_branch
+       WHERE e.id_user = ? LIMIT 1`,
+      [id_user]
+    );
+    return rows[0] || null;
+  } finally {
+    await conn.end();
+  }
+};
+
 // Update employee
 exports.updateEmployee = async (id, employee) => {
   const conn = await createConnection();
