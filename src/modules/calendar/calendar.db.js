@@ -236,3 +236,83 @@ exports.createDefaultCalendarForEmployee = async (id_employee) => {
 
     return { success: true };
 };
+
+exports.getMyCalendarEmpDB = async (id_employee) => {
+    const conn = await createConnection();
+    try {
+        // Employee data
+        const [employeeRows] = await conn.execute(
+            `
+            SELECT 
+                be.id AS id_book_event,
+                be.title AS event_name,
+                CONCAT(cu.name, ' ', cu.last_name) AS client_name,
+                b.location AS branch_location,
+                CONCAT(eu.name, ' ', eu.last_name) AS employee_name,
+                be.start AS start_datetime,
+                be.end AS end_datetime,
+                TIMESTAMPDIFF(MINUTE, be.start, be.end) AS duration_minutes,
+                s.price AS service_price
+            FROM booked_events be
+            LEFT JOIN User cu ON cu.id_user = be.id_client
+            LEFT JOIN Employee e ON e.id_employee = be.id_employee
+            LEFT JOIN User eu ON eu.id_user = e.id_user
+            LEFT JOIN Branch b ON b.id_branch = be.id_branch
+            LEFT JOIN Service s 
+                ON s.name = be.title 
+                AND s.id_branch = be.id_branch
+            WHERE cu.id_user = ?;
+            `,
+            [id_employee]
+        );
+        if (!employeeRows.length) throw new Error("Employee not found");
+        const employee = employeeRows[0];
+
+
+        return {
+            employeeRows
+        };
+    } finally {
+        await conn.end();
+    }
+};
+
+exports.getMyCalendarCliDB = async (id_client) => {
+    const conn = await createConnection();
+    try {
+        // Employee data
+        const [clientRows] = await conn.execute(
+            `
+            SELECT 
+                be.id AS id_book_event,
+                be.title AS event_name,
+                CONCAT(cu.name, ' ', cu.last_name) AS client_name,
+                b.location AS branch_location,
+                CONCAT(eu.name, ' ', eu.last_name) AS employee_name,
+                be.start AS start_datetime,
+                be.end AS end_datetime,
+                TIMESTAMPDIFF(MINUTE, be.start, be.end) AS duration_minutes,
+                s.price AS service_price
+            FROM booked_events be
+            LEFT JOIN User cu ON cu.id_user = be.id_client
+            LEFT JOIN Employee e ON e.id_employee = be.id_employee
+            LEFT JOIN User eu ON eu.id_user = e.id_user
+            LEFT JOIN Branch b ON b.id_branch = be.id_branch
+            LEFT JOIN Service s 
+                ON s.name = be.title
+                AND s.id_branch = be.id_branch
+            WHERE be.id_client = ?;
+            `,
+            [id_client]
+        );
+        if (!clientRows.length) throw new Error("Client not found");
+        const employee = clientRows[0];
+
+
+        return {
+            clientRows
+        };
+    } finally {
+        await conn.end();
+    }
+};

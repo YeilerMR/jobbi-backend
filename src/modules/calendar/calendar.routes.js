@@ -9,6 +9,8 @@ const verifyToken = require("../../utils/services/verifyToken");
  * ----------------------------------------------------------------------
  */
 
+router.get('/events', verifyToken(), calendarController.getMyEvents)
+
 // Fetch all events for an employee (Google Calendar + DB merged)
 router.get('/:id_employee/events', verifyToken(), calendarController.getEvents);
 

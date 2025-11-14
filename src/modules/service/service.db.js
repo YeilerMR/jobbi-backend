@@ -44,11 +44,11 @@ async function findServicesByBranchId(id_branch) {
 async function updateServiceById(id_service, updatedData) {
   const connection = await createConnection();
 
-  const { name, description, price, duration, state_service } = updatedData;
+  const { id_branch, id_specialty, name, description, price, duration, state_service } = updatedData;
 
   await connection.execute(
-    `UPDATE Service SET name = ?, description = ?, price = ?, duration = ?, state_service = ? WHERE id_service = ?`,
-    [name, description, price, duration, state_service, id_service]
+    `UPDATE Service SET id_branch = ?, id_specialty = ? , name = ?, description = ?, price = ?, duration = ?, state_service = ? WHERE id_service = ?`,
+    [id_branch, id_specialty, name, description, price, duration, state_service, id_service]
   );
 
   await connection.end();
@@ -113,6 +113,7 @@ async function findBranchesByService(searchValue) {
           b.phone,
           s.name AS service_name,
           s.description,
+          s.id_service,
           u.name AS user_name,
           cp.total_points,
           CASE WHEN EXISTS (

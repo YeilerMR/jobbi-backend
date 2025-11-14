@@ -269,3 +269,15 @@ exports.buildEventFromReducedPayload = async (payload, id_client) => {
         timezone: "America/Costa_Rica"
     };
 };
+
+exports.getMyEvents = async (idClient = null, idEmployee = null) => {
+    
+    if(idClient) {
+        return db.getMyCalendarCliDB(idClient);
+    }
+
+    if(idEmployee) {
+        return db.getMyCalendarEmpDB(idEmployee);
+    }
+    return null;
+};

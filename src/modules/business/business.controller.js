@@ -67,8 +67,6 @@ exports.updateBusiness = async (req, res) => {
     const businessId = req.params.id;
     const updateData = req.body;
 
-    console.log('Cuerpo peticion al actualizar: ', updateData);
-
     const updatedBusiness = await businessService.updateBusiness(userId, businessId, updateData);
 
     if (!updatedBusiness) {

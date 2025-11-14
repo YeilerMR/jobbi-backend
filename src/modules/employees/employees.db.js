@@ -22,10 +22,8 @@ exports.listEmployees = async (filters) => {
     const where = [];
     const args = [];
     if (filters.id_branch) { where.push('e.id_branch = ?'); args.push(filters.id_branch); }
-    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
-    const limit = Number(filters.limit) || 50;
-    const offset = Number(filters.offset) || 0;
-
+    const whereSql = where.length ? `WHERE ${where}` : '';
+    
     const [rows] = await conn.execute(
       `SELECT e.id_employee, e.id_branch, e.id_user, e.availability,
               u.name, u.last_name, u.email, u.phone,
@@ -33,9 +31,8 @@ exports.listEmployees = async (filters) => {
        FROM \`Employee\` e
        INNER JOIN \`User\` u ON e.id_user = u.id_user
        LEFT JOIN \`Branch\` br ON e.id_branch = br.id_branch
-       ${whereSql} 
-       LIMIT ? OFFSET ?`,
-      [...args, limit, offset]
+       ${whereSql} `,
+      [...args]
     );
     const [[countRow]] = await conn.execute(
       `SELECT COUNT(*) AS total FROM \`Employee\` e ${whereSql}`,
