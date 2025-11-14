@@ -1,18 +1,19 @@
 const { createConnection } = require('../../utils/database/dbconnection');
 
-// Create employee
 exports.createEmployee = async (employee) => {
   const conn = await createConnection();
   try {
     const [result] = await conn.execute(
-      'INSERT INTO `Employee` (id_branch, id_user, availability) VALUES (?, ?, ?)',
+      'INSERT INTO Employee (id_branch, id_user, availability) VALUES (?, ?, ?)',
       [employee.id_branch, employee.id_user, employee.availability ?? 1]
     );
-    return { insertId: result.insertId };
+
+    return { id_employee: result.insertId };
   } finally {
     await conn.end();
   }
 };
+
 
 // List all employees (optional filter by branch)
 exports.listEmployees = async (filters) => {
@@ -167,7 +168,7 @@ exports.getSchedule = async (id_employee) => {
     // If you have a Schedule table:
     // const [rows] = await conn.execute('SELECT * FROM `Schedule` WHERE id_employee = ?', [id_employee]);
     // return rows;
-    
+
     // Placeholder response if table doesn't exist:
     return { id_employee, schedule: [] };
   } finally {
@@ -217,3 +218,5 @@ exports.existsEmployeeInBranch = async (id_user, id_branch) => {
     await conn.end();
   }
 };
+
+
