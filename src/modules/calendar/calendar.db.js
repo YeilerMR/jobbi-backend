@@ -186,3 +186,51 @@ exports.getCalendarDB = async (id_employee) => {
         await conn.end();
     }
 };
+
+
+// Inserts default calendar configuration for an employee
+exports.createDefaultCalendarForEmployee = async (id_employee) => {
+  // Default values for a brand-new business
+  const DEFAULT_CONFIG = {
+    slot_duration_minutes: 30,
+    buffer_between_bookings_minutes: 15,
+    booking_window_days: 30,
+    min_booking_duration_slots: 1,
+    max_booking_duration_slots: 4
+  };
+
+  const conn = await createConnection();
+  // Insert into calendar_config
+  await conn.query(
+    `
+      INSERT INTO calendar_config 
+      (id_employee, slot_duration_minutes, buffer_between_bookings_minutes,
+       booking_window_days, min_booking_duration_slots, max_booking_duration_slots)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `,
+    [
+      id_employee,
+      DEFAULT_CONFIG.slot_duration_minutes,
+      DEFAULT_CONFIG.buffer_between_bookings_minutes,
+      DEFAULT_CONFIG.booking_window_days,
+      DEFAULT_CONFIG.min_booking_duration_slots,
+      DEFAULT_CONFIG.max_booking_duration_slots
+    ]
+  );
+
+  // Insert default working hours (Mon–Fri, 09:00–17:00)
+  const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const WORKING_HOURS = JSON.stringify({ available: ["09:00-17:00"] });
+
+  for (const day of DAYS) {
+    await conn.query(
+      `
+        INSERT INTO working_hours (id_employee, day_of_week, time_ranges)
+        VALUES (?, ?, ?)
+      `,
+      [id_employee, day, WORKING_HOURS]
+    );
+  }
+
+  return { success: true };
+};
