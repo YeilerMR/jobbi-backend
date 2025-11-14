@@ -12,11 +12,17 @@ const {
 
 const { getUserById, updateUserRole } = require('../user/user.db');
 
+const { createDefaultCalendarForEmployee } = require('../calendar/calendar.db');
+
+const { createEmployee } = require('../employees/employees.db');
+
+const { createBranch } = require('../branch/branch.db');
+
 exports.createBusinessFlow = async (userId, businessData) => {
   const user = await getUserById(userId);
   if (!user) throw new Error("User not found");
 
-  // Create business
+  // 1. Create business
   const businessToCreate = {
     id_user_admin: userId,
     name: businessData.name,
@@ -28,8 +34,8 @@ exports.createBusinessFlow = async (userId, businessData) => {
 
   const business = await insertBusiness(businessToCreate);
 
-  // Create branch
-  const branch = await insertBranch({
+  // 2. Create branch
+  const branch = await createBranch({
     id_business: business.id_business,
     name: business.name,
     location: business.location,
@@ -38,13 +44,23 @@ exports.createBusinessFlow = async (userId, businessData) => {
     state_branch: 1
   });
 
-  // Update role if client
+  // 3. Convert user → admin if necessary
   if (user.id_rol === 2) {
     await updateUserRole(userId, 1);
     user.id_rol = 1;
   }
 
-  return { business, branch, updatedUser: user };
+  // 4. Create employee entry for business owner
+  const employee = await createEmployee({
+    id_branch: branch.id_branch,
+    id_user: userId,
+    availability: 1
+  });
+
+  // 5. Generate default calendar config for the new employee
+  await createDefaultCalendarForEmployee(employee.id_employee);
+
+  return { business, branch, employee, updatedUser: user };
 };
 
 exports.listBusinessesByUser = async (userId) => {
@@ -65,7 +81,7 @@ exports.getBusinessById = async (userId, businessId) => {
 exports.updateBusiness = async (userId, businessId, updateData) => {
   const business = await findBusinessById(businessId);
 
-  if (!business || business.id_user_admin !== userId ) {//|| business.state_business !== 1
+  if (!business || business.id_user_admin !== userId) {//|| business.state_business !== 1
     return null;
   }
 
@@ -107,8 +123,8 @@ exports.searchBusinesses = async (searchParams) => {
     };
 
     // Validar que al menos un parámetro de búsqueda esté presente
-    const hasSearchParam = cleanParams.name || cleanParams.location || 
-                          cleanParams.specialty || cleanParams.service;
+    const hasSearchParam = cleanParams.name || cleanParams.location ||
+      cleanParams.specialty || cleanParams.service;
 
     if (!hasSearchParam) {
       // Si no hay parámetros específicos, devolver negocios activos con límite
@@ -142,7 +158,7 @@ exports.getBusinessDetails = async (businessId) => {
     }
 
     const servicesAndSpecialties = await getBusinessServicesAndSpecialties(businessId);
-    
+
     return {
       ...business,
       services_and_specialties: servicesAndSpecialties

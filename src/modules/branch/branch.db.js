@@ -53,12 +53,15 @@ async function getBranchById(id_branch) {
 async function createBranch(branch) {
     const connection = await createConnection();
     const [result] = await connection.execute(
-        `INSERT INTO ${tbBranch} (id_business, name, location, phone, email, state_branch) VALUES (?, ?, ?, ?, ?, 1)`,
+        `INSERT INTO ${tbBranch} (id_business, name, location, phone, email, state_branch) 
+     VALUES (?, ?, ?, ?, ?, 1)`,
         [branch.id_business, branch.name, branch.location, branch.phone, branch.email]
     );
     await connection.end();
-    return result.insertId;
+
+    return { id_branch: result.insertId };
 }
+
 
 async function updateBranch(id_branch, branch) {
     try {

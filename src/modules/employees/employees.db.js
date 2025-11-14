@@ -1,18 +1,19 @@
 const { createConnection } = require('../../utils/database/dbconnection');
 
-// Create employee
 exports.createEmployee = async (employee) => {
   const conn = await createConnection();
   try {
     const [result] = await conn.execute(
-      'INSERT INTO `Employee` (id_branch, id_user, availability) VALUES (?, ?, ?)',
+      'INSERT INTO Employee (id_branch, id_user, availability) VALUES (?, ?, ?)',
       [employee.id_branch, employee.id_user, employee.availability ?? 1]
     );
-    return { insertId: result.insertId };
+
+    return { id_employee: result.insertId };
   } finally {
     await conn.end();
   }
 };
+
 
 // List all employees (optional filter by branch)
 exports.listEmployees = async (filters) => {
@@ -84,6 +85,26 @@ exports.getEmployeeById = async (id) => {
   }
 };
 
+// Get employee by user id
+exports.getEmployeeByUserId = async (id_user) => {
+  const conn = await createConnection();
+  try {
+    const [rows] = await conn.execute(
+      `SELECT e.id_employee, e.id_branch, e.id_user, e.availability,
+              u.name, u.last_name, u.email, u.phone,
+              br.name AS branch_name
+       FROM \`Employee\` e
+       INNER JOIN \`User\` u ON e.id_user = u.id_user
+       LEFT JOIN \`Branch\` br ON e.id_branch = br.id_branch
+       WHERE e.id_user = ? LIMIT 1`,
+      [id_user]
+    );
+    return rows[0] || null;
+  } finally {
+    await conn.end();
+  }
+};
+
 // Update employee
 exports.updateEmployee = async (id, employee) => {
   const conn = await createConnection();
@@ -144,7 +165,7 @@ exports.getSchedule = async (id_employee) => {
     // If you have a Schedule table:
     // const [rows] = await conn.execute('SELECT * FROM `Schedule` WHERE id_employee = ?', [id_employee]);
     // return rows;
-    
+
     // Placeholder response if table doesn't exist:
     return { id_employee, schedule: [] };
   } finally {
@@ -194,3 +215,5 @@ exports.existsEmployeeInBranch = async (id_user, id_branch) => {
     await conn.end();
   }
 };
+
+

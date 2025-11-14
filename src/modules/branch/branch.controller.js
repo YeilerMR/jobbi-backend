@@ -50,14 +50,27 @@ exports.getBranchById = async (req, res) => {
 
 exports.createBranch = async (req, res) => {
     try {
+        // Authorization check
+        if (!req.user || req.user.id_rol != 1) {
+            return res.status(405).json({ success: false, message: "Method Not Allowed" });
+        }
+        
         const { id_business, name, location, phone, email } = req.body;
         if (!id_business || !name || !location || !phone || !email) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
         const branch = { id_business, name, location, phone, email };
-        const insertId = await branchService.createBranch(branch);
+        const insertId = await branchService.createBranch(req.user.id_user, branch);
         res.status(201).json({ success: true, message: "Branch created", id_branch: insertId });
     } catch (error) {
+        // Manejar error de límite de plan
+        if (error.status === 403) {
+            return res.status(403).json({ 
+                success: false, 
+                message: error.message,
+                details: error.details
+            });
+        }
         res.status(500).json({ success: false, message: error.message });
     }
 };

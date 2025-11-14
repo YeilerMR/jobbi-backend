@@ -113,3 +113,30 @@ exports.updateUserGiftStatus = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
+// NOTE: /gifts/qr/create endpoint removed — token generation performed elsewhere or disabled
+
+// POST /gifts/qr/validate -> body: { token, markUsed }
+exports.validateQRCode = async (req, res) => {
+  try {
+    const requester = req.user || null; // may be unauthenticated scanner
+    const { token, markUsed, id_user_gift } = req.body || {};
+
+    if (!token && !id_user_gift) return res.status(400).json({ success: false, message: 'token or id_user_gift is required' });
+
+    let result;
+    if (token) {
+      result = await service.validateQRCode(token, { markUsed: !!markUsed, usedBy: requester ? requester.id_user : null });
+    } else {
+      // validate by user_gift id (flow from /gifts/assoc)
+      result = await service.validateUserGiftById(id_user_gift, { markUsed: !!markUsed, usedBy: requester ? requester.id_user : null });
+    }
+
+    if (!result.valid) return res.status(400).json({ success: false, message: result.reason, data: result.record });
+
+    return res.json({ success: true, message: 'Token valid', data: result.record, used: !!result.used });
+  } catch (err) {
+    console.error('Error in validateQRCode:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
