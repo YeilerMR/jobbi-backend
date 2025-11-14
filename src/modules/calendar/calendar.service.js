@@ -269,3 +269,8 @@ exports.buildEventFromReducedPayload = async (payload, id_client) => {
         timezone: "America/Costa_Rica"
     };
 };
+
+exports.getMyEvents = async (idClient = null, idEmployee = null) => {
+    console.log("Cl: ",idClient, "Em: ", idEmployee);
+    return null;
+};
