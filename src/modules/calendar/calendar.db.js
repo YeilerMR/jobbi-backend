@@ -261,7 +261,7 @@ exports.getMyCalendarEmpDB = async (id_employee) => {
             LEFT JOIN Service s 
                 ON s.name = be.title 
                 AND s.id_branch = be.id_branch
-            WHERE be.id_employee = ?;
+            WHERE cu.id_user = ?;
             `,
             [id_employee]
         );
