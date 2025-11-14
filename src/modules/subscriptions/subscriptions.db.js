@@ -27,8 +27,13 @@ async function getPlanCharacteristics(planId) {
 
 function limitsFromCharacteristics(characteristics) {
   // Default: no limits defined
+  let maxBusinesses = null; // null means unlimited
   let maxBranches = null; // null means unlimited
   let maxEmployeesPerBranch = null;
+
+  // Characteristic IDs for business limits (assuming ID 7 for 1 business limit)
+  if (characteristics.includes(7)) maxBusinesses = 1;
+  // Add more business limit characteristics if needed
 
   if (characteristics.includes(1)) maxBranches = 1;
   if (characteristics.includes(3)) maxBranches = 2;
@@ -38,7 +43,7 @@ function limitsFromCharacteristics(characteristics) {
   if (characteristics.includes(4)) maxEmployeesPerBranch = 10;
   if (characteristics.includes(6)) maxEmployeesPerBranch = null; // unlimited
 
-  return { maxBranches, maxEmployeesPerBranch };
+  return { maxBusinesses, maxBranches, maxEmployeesPerBranch };
 }
 
 async function getPlanLimits(planId) {
@@ -157,6 +162,21 @@ async function getBranchesForAdmin(userId) {
   }
 }
 
+async function countBusinessesForAdmin(userId) {
+  const conn = await createConnection();
+  try {
+    const [rows] = await conn.execute(
+      `SELECT COUNT(*) as total
+       FROM Business
+       WHERE id_user_admin = ? AND state_business = 1`,
+      [userId]
+    );
+    return rows[0]?.total || 0;
+  } finally {
+    await conn.end();
+  }
+}
+
 module.exports = {
   getAllPlans,
   getPlanCharacteristics,
@@ -169,5 +189,6 @@ module.exports = {
   countBranchesForAdmin,
   countEmployeesInBranch,
   getBranchesForAdmin,
+  countBusinessesForAdmin,
   limitsFromCharacteristics,
 };
