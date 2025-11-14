@@ -97,43 +97,84 @@ async function findBranchById(id_branch) {
   return rows[0]; // Return the branch if found, else undefined
 }
 
-async function updateBusinessById(businessId, updateData) {
-  const connection = await createConnection();
+async function getBusinessByBranch (id_branch) {
+  try {
 
-  // Build SET dynamically, only for allowed fields
-  const allowedFields = ['name', 'location', 'phone', 'email', 'state_business'];
-  const setClauses = [];
-  const params = [];
+    const connection = await createConnection();
 
-  for (const key of allowedFields) {
-    if (updateData[key] !== undefined) {
-      setClauses.push(`${key} = ?`);
-      params.push(updateData[key]);
+    const [rows] = await connection.execute(
+      `
+      SELECT 
+        b.id_business,
+        b.id_user_admin,
+        b.name AS business_name,
+        b.location AS business_location,
+        b.phone AS business_phone,
+        b.email AS business_email,
+        b.state_business,
+        br.id_branch,
+        br.name AS branch_name,
+        br.location AS branch_location,
+        br.phone AS branch_phone,
+        br.email AS branch_email,
+        br.state_branch
+      FROM Branch br
+      INNER JOIN Business b 
+        ON br.id_business = b.id_business
+      WHERE br.id_branch = ?
+      LIMIT 1;
+      `,
+      [id_branch]
+    );
+
+    if (rows.length === 0) {
+      return null; // Branch not found or no related business
     }
-  }
 
-  if (setClauses.length === 0) {
+    return rows[0];
+  } catch (error) {
+    console.error("Error in getBusinessByBranch:", error);
+    throw error;
+  }
+};
+
+  async function updateBusinessById(businessId, updateData) {
+    const connection = await createConnection();
+
+    // Build SET dynamically, only for allowed fields
+    const allowedFields = ['name', 'location', 'phone', 'email', 'state_business'];
+    const setClauses = [];
+    const params = [];
+
+    for (const key of allowedFields) {
+      if (updateData[key] !== undefined) {
+        setClauses.push(`${key} = ?`);
+        params.push(updateData[key]);
+      }
+    }
+
+    if (setClauses.length === 0) {
+      await connection.end();
+      return null;
+    }
+
+    params.push(businessId);
+
+    await connection.execute(
+      `UPDATE Business SET ${setClauses.join(', ')} WHERE id_business = ?`,
+      params
+    );
+
+    // Return updated business
+    const [rows] = await connection.execute(
+      `SELECT * FROM Business WHERE id_business = ?`,
+      [businessId]
+    );
+
     await connection.end();
-    return null;
+
+    return rows[0];
   }
-
-  params.push(businessId);
-
-  await connection.execute(
-    `UPDATE Business SET ${setClauses.join(', ')} WHERE id_business = ?`,
-    params
-  );
-
-  // Return updated business
-  const [rows] = await connection.execute(
-    `SELECT * FROM Business WHERE id_business = ?`,
-    [businessId]
-  );
-
-  await connection.end();
-
-  return rows[0];
-}
 
 async function softDeleteBusinessById(businessId) {
   const connection = await createConnection();
@@ -233,10 +274,10 @@ async function searchBusinesses(searchParams = {}) {
 
   // Agrupar resultados por negocio
   const businessMap = new Map();
-  
+
   rows.forEach(row => {
     const businessId = row.id_business;
-    
+
     if (!businessMap.has(businessId)) {
       businessMap.set(businessId, {
         id_business: row.id_business,
@@ -252,7 +293,7 @@ async function searchBusinesses(searchParams = {}) {
     if (row.id_branch) {
       const business = businessMap.get(businessId);
       const existingBranch = business.branches.find(b => b.id_branch === row.id_branch);
-      
+
       if (!existingBranch) {
         business.branches.push({
           id_branch: row.id_branch,
@@ -299,12 +340,12 @@ async function getBusinessServicesAndSpecialties(businessId) {
 
   // Agrupar por especialidad
   const specialtyMap = new Map();
-  
+
   rows.forEach(row => {
     if (!row.id_specialty) return;
-    
+
     const specialtyId = row.id_specialty;
-    
+
     if (!specialtyMap.has(specialtyId)) {
       specialtyMap.set(specialtyId, {
         id_specialty: row.id_specialty,
@@ -316,7 +357,7 @@ async function getBusinessServicesAndSpecialties(businessId) {
     if (row.id_service) {
       const specialty = specialtyMap.get(specialtyId);
       const existingService = specialty.services.find(s => s.id_service === row.id_service);
-      
+
       if (!existingService) {
         specialty.services.push({
           id_service: row.id_service,
@@ -344,5 +385,6 @@ module.exports = {
   softDeleteBranchesByBusinessId,
   findBranchById,
   searchBusinesses,
-  getBusinessServicesAndSpecialties
+  getBusinessServicesAndSpecialties,
+  getBusinessByBranch
 };

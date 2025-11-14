@@ -3,6 +3,10 @@ const { google } = require('googleapis');
 const db = require('./calendar.db');
 const { DateTime } = require('luxon');
 
+const { getUserById } = require("../user/user.db");
+const { getEmployeeById } = require("../employees/employees.db");
+const { getBusinessByBranch } = require("../business/business.db");
+const { findServiceById } = require("../service/service.db");
 /* ============================================================
    GOOGLE CALENDAR METHODS
    ============================================================ */
@@ -19,43 +23,6 @@ exports.listGoogleEvents = async (auth) => {
     });
 
     return res.data.items || [];
-};
-
-exports.createGoogleEvent = async (auth, data) => {
-    const calendar = google.calendar({ version: 'v3', auth });
-
-    const event = {
-        summary: data.summary || data.title || 'Untitled Event',
-        location: data.location || '',
-        description: data.description || '',
-        start: {
-            dateTime: data.start,
-            timeZone: data.timezone || 'America/Costa_Rica',
-        },
-        end: {
-            dateTime: data.end,
-            timeZone: data.timezone || 'America/Costa_Rica',
-        },
-        attendees: [
-            data.client?.email ? { email: data.client.email } : null,
-            data.business?.email ? { email: data.business.email } : null,
-            data.employee?.email ? { email: data.employee.email } : null,
-        ].filter(Boolean),
-        reminders: {
-            useDefault: false,
-            overrides: [
-                { method: 'email', minutes: 24 * 60 },
-                { method: 'popup', minutes: 30 },
-            ],
-        },
-    };
-
-    const res = await calendar.events.insert({
-        calendarId: 'primary',
-        resource: event,
-    });
-
-    return res.data;
 };
 
 exports.updateGoogleEvent = async (auth, eventId, data) => {
@@ -110,11 +77,6 @@ exports.getEventsFromDB = async (id_employee) => {
     return await db.getEvents(id_employee);
 };
 
-exports.createEventInDB = async (id_employee, event) => {
-    if (!event?.start || !event?.end) throw new Error('Event start/end required');
-    return await db.createEvent(id_employee, event);
-};
-
 exports.updateEventInDB = async (id_employee, id, event) => {
     if (!id) throw new Error('Event ID required');
     return await db.updateEvent(id_employee, id, event);
@@ -165,24 +127,6 @@ exports.getEvents = async (auth, id_employee) => {
     return this.mergeEvents(googleEvents, dbEvents);
 };
 
-// Create event in both Google and DB
-exports.createEvent = async (auth, id_employee, id_branch, id_client, eventData) => {
-    // 1️⃣ Create Google Calendar event
-    const googleEvent = await this.createGoogleEvent(auth, eventData);
-
-    // 2️⃣ Store in DB
-    if (id_employee) {
-        await this.createEventInDB(id_employee, {
-            ...eventData,
-            google_event_id: googleEvent.id,
-            id_client,
-            id_branch
-        });
-    }
-
-    return googleEvent;
-};
-
 // Update event in both Google and DB
 exports.updateEvent = async (auth, id_employee, eventId, eventData) => {
     const updatedGoogleEvent = await this.updateGoogleEvent(auth, eventId, eventData);
@@ -221,4 +165,107 @@ exports.mergeEvents = (googleEvents, dbEvents) => {
     }));
 
     return [...taggedGoogle, ...taggedLocal];
+};
+
+
+exports.getEmailsForEvent = async (id_client, id_employee, id_branch) => {
+    const client = await getUserById(id_client);
+    const employee = await getEmployeeById(id_employee);
+    const business = await getBusinessByBranch(id_branch);
+
+    return {
+        clientEmail: client?.email || null,
+        employeeEmail: employee?.email || null,
+        businessEmail: business?.email || null
+    };
+};
+
+// Create event in both Google and DB
+exports.createEvent = async (auth, id_employee, id_branch, id_client, eventData) => {
+
+    const emails = await this.getEmailsForEvent(id_client, id_employee, id_branch);
+
+    const googleEvent = await this.createGoogleEvent(auth, {
+        ...eventData,
+        clientEmail: emails.clientEmail,
+        employeeEmail: emails.employeeEmail,
+        businessEmail: emails.businessEmail,
+    });
+
+    await this.createEventInDB(id_employee, {
+        ...eventData,
+        google_event_id: googleEvent.id,
+        id_client,
+        id_branch
+    });
+
+    return googleEvent;
+};
+
+
+exports.createEventInDB = async (id_employee, event) => {
+    if (!event?.start || !event?.end) throw new Error('Event start/end required');
+    return await db.createEvent(id_employee, event);
+};
+
+exports.createGoogleEvent = async (auth, data) => {
+    const calendar = google.calendar({ version: 'v3', auth });
+
+    const event = {
+        summary: data.title || "Service",
+        description: data.description || "",
+        location: data.location || "",
+        start: {
+            dateTime: data.start,
+            timeZone: data.timezone || 'America/Costa_Rica',
+        },
+        end: {
+            dateTime: data.end,
+            timeZone: data.timezone || 'America/Costa_Rica',
+        },
+        attendees: [
+            data.clientEmail ? { email: data.clientEmail } : null,
+            data.employeeEmail ? { email: data.employeeEmail } : null,
+            data.businessEmail ? { email: data.businessEmail } : null
+        ].filter(Boolean)
+    };
+
+    const res = await calendar.events.insert({
+        calendarId: 'primary',
+        resource: event
+    });
+
+    return res.data;
+};
+
+
+exports.buildEventFromReducedPayload = async (payload, id_client) => {
+    const { appointment_date, appointment_time, id_service } = payload;
+
+    const service = await findServiceById(id_service);
+    if (!service) throw new Error("Service not found");
+
+    // Start datetime
+    const start = `${appointment_date}T${appointment_time}`;
+
+    // End datetime (no UTC shift)
+    const endDate = new Date(`${appointment_date}T${appointment_time}`);
+    endDate.setMinutes(endDate.getMinutes() + service.duration);
+
+    const end = `${appointment_date}T${String(endDate.getHours()).padStart(2, "0")}:${String(endDate.getMinutes()).padStart(2, "0")}:00`;
+
+    return {
+        title: service.name,
+        description: service.description || "",
+        location: "",
+        start,
+        end,
+        id_service,
+        id_client,
+        id_employee: payload.id_employee,
+        id_branch: payload.id_branch,
+        type: "client",
+        recurrence: null,
+        timezone: "America/Costa_Rica"
+    };
 };
