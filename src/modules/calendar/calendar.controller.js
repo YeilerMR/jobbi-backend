@@ -19,6 +19,19 @@ exports.getEvents = async (req, res) => {
     }
 };
 
+exports.getMyEvents = async (req, res) => {
+    try {
+        const userId = req.user.id_user;
+        const userRol = req.user.id_rol;
+
+        const data = await calendarService.getMyEvents(userRol == 2 ? userId : null, userRol == 3 ? userId : null);
+
+        res.status(200).json({ success: true, data: data });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 exports.createEvent = async (req, res) => {
     try {
         const payload = req.body;
