@@ -26,6 +26,37 @@ exports.getMyEvents = async (req, res) => {
 
         const data = await calendarService.getMyEvents(userRol == 2 ? userId : null, userRol == 3 ? userId : null);
 
+        const formatDate = (dateStr) => {
+            const d = new Date(dateStr);
+
+            const days = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+            const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+            const day = days[d.getUTCDay()];
+            const dayNum = d.getUTCDate().toString().padStart(2, '0');
+            const month = months[d.getUTCMonth()];
+            const year = d.getUTCFullYear();
+
+            const hours = d.getUTCHours().toString().padStart(2, '0');
+            const minutes = d.getUTCMinutes().toString().padStart(2, '0');
+
+            return `${day} ${dayNum} ${month} ${year} - ${hours}:${minutes}`;
+        };
+
+        if (data.clientRows) {
+            data.clientRows = data.clientRows.map(ev => ({
+                ...ev,
+                formatted_datetime: formatDate(ev.start_datetime)
+            }));
+        }
+
+        if (data.employeeRows) {
+            data.employeeRows = data.employeeRows.map(ev => ({
+                ...ev,
+                formatted_datetime: formatDate(ev.start_datetime)
+            }));
+        }
+
         res.status(200).json({ success: true, data: data });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
