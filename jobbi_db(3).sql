@@ -178,7 +178,8 @@ INSERT INTO `CharacteristicsPlans` (`id_characteristics`, `description`) VALUES
 (3, 'Máximo 2 sucursales'),
 (4, 'Máximo 10 empleados por sucursal'),
 (5, 'Sucursales ilimitadas'),
-(6, 'Empleados ilimitados');
+(6, 'Empleados ilimitados'),
+(7, 'Máximo 1 negocio');
 
 -- --------------------------------------------------------
 
@@ -328,6 +329,7 @@ CREATE TABLE `PlanCharacteristics` (
 INSERT INTO `PlanCharacteristics` (`id_plan`, `id_characteristics`) VALUES
 (1, 1),
 (1, 2),
+(1, 7),
 (2, 3),
 (2, 4),
 (3, 5),

@@ -79,6 +79,23 @@ exports.getMyPlanUsage = async (req, res) => {
 };
 
 /**
+ * Check if the authenticated admin can create a business
+ */
+exports.canCreateBusiness = async (req, res) => {
+  try {
+    if (!req.user || req.user.id_rol != 1) {
+      return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+    }
+
+    const validation = await subscriptionService.canCreateBusiness(req.user.id_user);
+    res.status(200).json({ success: true, data: validation });
+  } catch (error) {
+    console.error('Error checking business creation:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
  * Check if the authenticated admin can create a branch
  */
 exports.canCreateBranch = async (req, res) => {

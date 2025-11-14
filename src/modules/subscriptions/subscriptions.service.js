@@ -38,7 +38,8 @@ async function getUserPlanWithLimits(userId) {
 }
 
 async function getPlanUsage(userId) {
-  // Count branches across all businesses owned by this admin
+  // Count businesses, branches and employees
+  const totalBusinesses = await subscriptionDb.countBusinessesForAdmin(userId);
   const totalBranches = await subscriptionDb.countBranchesForAdmin(userId);
   const branchIds = await subscriptionDb.getBranchesForAdmin(userId);
   const employeesByBranch = [];
@@ -46,7 +47,31 @@ async function getPlanUsage(userId) {
     const total = await subscriptionDb.countEmployeesInBranch(bid);
     employeesByBranch.push({ branchId: bid, employees: total });
   }
-  return { totalBranches, employeesByBranch };
+  return { totalBusinesses, totalBranches, employeesByBranch };
+}
+
+async function canCreateBusiness(userId) {
+  const plan = await getUserPlanWithLimits(userId);
+  if (!plan) {
+    return { allowed: false, reason: 'no_active_plan', message: "You don't have an active plan" };
+  }
+  const usage = await getPlanUsage(userId);
+  const maxBusinesses = plan.limits.maxBusinesses; // null means unlimited
+  if (maxBusinesses === null) {
+    return { allowed: true, usage: { totalBusinesses: usage.totalBusinesses, maxBusinesses: null } };
+  }
+  const allowed = usage.totalBusinesses < maxBusinesses;
+  if (!allowed) {
+    return {
+      allowed: false,
+      reason: 'business_limit_reached',
+      message: 'You already have the maximum number of businesses allowed by your plan.',
+      currentCount: usage.totalBusinesses,
+      limit: maxBusinesses,
+      usage: { totalBusinesses: usage.totalBusinesses, maxBusinesses },
+    };
+  }
+  return { allowed: true, usage: { totalBusinesses: usage.totalBusinesses, maxBusinesses } };
 }
 
 async function canCreateBranch(userId /*, businessId */) {
@@ -138,6 +163,17 @@ async function changeUserPlan(userId, newPlanId) {
   const limits = await subscriptionDb.getPlanLimits(newPlanId);
   const usage = await getPlanUsage(userId);
 
+  // Business limit check
+  if (limits.maxBusinesses !== null && usage.totalBusinesses > limits.maxBusinesses) {
+    return {
+      changed: false,
+      reason: 'business_limit_exceeded',
+      message: `You currently have ${usage.totalBusinesses} businesses which exceeds the new plan limit (${limits.maxBusinesses}).`,
+      limits,
+      usage,
+    };
+  }
+
   // Branch limit check
   if (limits.maxBranches !== null && usage.totalBranches > limits.maxBranches) {
     return {
@@ -191,6 +227,7 @@ module.exports = {
   getUserPlanInfo,
   getUserPlanWithLimits,
   getPlanUsage,
+  canCreateBusiness,
   canCreateBranch,
   canCreateEmployee,
   assignPlanToUser,
