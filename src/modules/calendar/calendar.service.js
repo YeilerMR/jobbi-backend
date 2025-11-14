@@ -271,6 +271,13 @@ exports.buildEventFromReducedPayload = async (payload, id_client) => {
 };
 
 exports.getMyEvents = async (idClient = null, idEmployee = null) => {
-    console.log("Cl: ",idClient, "Em: ", idEmployee);
+    
+    if(idClient) {
+        return db.getMyCalendarCliDB(idClient);
+    }
+
+    if(idEmployee) {
+        return db.getMyCalendarEmpDB(idEmployee);
+    }
     return null;
 };
