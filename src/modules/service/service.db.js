@@ -113,6 +113,7 @@ async function findBranchesByService(searchValue) {
           b.phone,
           s.name AS service_name,
           s.description,
+          s.id_service,
           u.name AS user_name,
           cp.total_points,
           CASE WHEN EXISTS (
