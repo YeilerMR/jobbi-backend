@@ -18,6 +18,11 @@ const { createEmployee } = require('../employees/employees.db');
 
 const { createBranch } = require('../branch/branch.db');
 
+const { 
+  getActiveSubscriptionWithPlan, 
+  createSubscription 
+} = require('../subscriptions/subscriptions.db');
+
 exports.createBusinessFlow = async (userId, businessData) => {
   const user = await getUserById(userId);
   if (!user) throw new Error("User not found");
@@ -60,7 +65,27 @@ exports.createBusinessFlow = async (userId, businessData) => {
   // 5. Generate default calendar config for the new employee
   await createDefaultCalendarForEmployee(employee.id_employee);
 
-  return { business, branch, employee, updatedUser: user };
+  // 6. Assign Free Plan (Plan 1) if user doesn't have an active subscription
+  let subscription = null;
+  try {
+    const activeSubscription = await getActiveSubscriptionWithPlan(userId);
+    if (!activeSubscription) {
+      // Create free plan subscription (Plan 1) for 1 year
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 1); // 1 year duration
+      
+      const formatDate = (date) => date.toISOString().split('T')[0];
+      
+      await createSubscription(userId, 1, formatDate(startDate), formatDate(endDate));
+      subscription = { plan_id: 1, plan_name: 'Free Plan' };
+    }
+  } catch (error) {
+    console.error('Error creating subscription:', error);
+    // Don't fail the business creation if subscription fails
+  }
+
+  return { business, branch, employee, updatedUser: user, subscription };
 };
 
 exports.listBusinessesByUser = async (userId) => {
