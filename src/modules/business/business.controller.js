@@ -1,9 +1,22 @@
 const businessService = require('./business.service');
+const subscriptionService = require('../subscriptions/subscriptions.service');
 
 exports.createBusiness = async (req, res) => {
   try {
     const userId = req.user.id_user;
     const businessData = req.body;
+
+    // Validate business limit before creating
+    const validation = await subscriptionService.canCreateBusiness(userId);
+    if (!validation.allowed) {
+      return res.status(403).json({
+        success: false,
+        message: validation.message,
+        reason: validation.reason,
+        currentCount: validation.currentCount,
+        limit: validation.limit
+      });
+    }
 
     const result = await businessService.createBusinessFlow(userId, businessData);
 
