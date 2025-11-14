@@ -69,10 +69,10 @@ exports.generateAvailability = async (id_employee, date) => {
     const dayName = days[new Date(date).getDay()];
 
     // Check for exceptions
-    const isException = calendar.exceptions.some(e => e.date.toISOString().split("T")[0] === date);
-    if (isException) {
-        return { date, slots: [], message: "Unavailable due to exception/holiday" };
-    }
+    // const isException = calendar.exceptions.some(e => e.date.toISOString().split("T")[0] === date);
+    // if (isException) {
+    //     return { date, slots: [], message: "Unavailable due to exception/holiday" };
+    // }
 
     // Get working hours for the day
     const workingDay = calendar.workingHours[dayName];
@@ -129,7 +129,7 @@ exports.generateAvailability = async (id_employee, date) => {
         employee: calendar.employee,
         config: calendar.config,
         date,
-        exceptions: calendar.exceptions,
+        // exceptions: calendar.exceptions,
         generatedAt: new Date().toISOString(),
         slots,
     };
@@ -164,10 +164,10 @@ exports.getCalendarDB = async (id_employee) => {
         }, {});
 
         // Exceptions
-        const [exceptionsRows] = await conn.execute(
-            "SELECT date, type, note FROM exceptions WHERE id_employee = ?",
-            [id_employee]
-        );
+        // const [exceptionsRows] = await conn.execute(
+        //     "SELECT date, type, note FROM exceptions WHERE id_employee = ?",
+        //     [id_employee]
+        // );
 
         // Booked events
         const [bookedEventsRows] = await conn.execute(
@@ -179,7 +179,7 @@ exports.getCalendarDB = async (id_employee) => {
             employee,
             config,
             workingHours,
-            exceptions: exceptionsRows,
+            // exceptions: exceptionsRows,
             bookedEvents: bookedEventsRows,
         };
     } finally {
