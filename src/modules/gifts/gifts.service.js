@@ -1,4 +1,8 @@
 const db = require('./gifts.db');
+const crypto = require('crypto');
+const PUBLIC_URL = process.env.PUBLIC_URL || process.env.HOST_URL || null;
+// Token expiry in minutes (fixed). Can be configured via env var GIFT_TOKEN_EXPIRES_MINUTES
+const TOKEN_EXPIRES_MINUTES = Number(process.env.GIFT_TOKEN_EXPIRES_MINUTES) || 60;
 
 // Returns { id_user, total_points, redeemed_points, available_points, last_update }
 exports.getGiftsForUser = async (id_user) => {

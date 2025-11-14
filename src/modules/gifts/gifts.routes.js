@@ -16,4 +16,8 @@ router.get('/mine', verifyToken(), controller.listUserGifts);
 // Get points/points-summary for the logged-in user (taken from JWT)
 router.get('/points', verifyToken(), controller.getGifts);
 
+// QR validation endpoint (creation endpoint removed)
+// validation can be done without auth (scanners), but accepts optional JWT to mark usedBy
+router.post('/qr/validate', controller.validateQRCode);
+
 module.exports = router;

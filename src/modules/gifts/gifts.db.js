@@ -94,7 +94,7 @@ exports.createAssociationUserGift = async (userId, giftId) => {
     const [result] = await connection.execute(
       `
             INSERT INTO User_Gift (id_user, id_gift, gift_date, redeemed, is_active)
-            VALUES (?, ?, NOW(), 1, 0)
+            VALUES (?, ?, NOW(), 0, 0)
             `,
       [userId, giftId]
     );

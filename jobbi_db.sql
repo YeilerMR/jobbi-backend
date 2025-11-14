@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mysql-jobbi.alwaysdata.net
--- Generation Time: Oct 12, 2025 at 09:32 PM
+-- Generation Time: Nov 02, 2025 at 04:23 AM
 -- Server version: 10.11.14-MariaDB
 -- PHP Version: 7.4.33
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `jobbi_db`
 --
+CREATE DATABASE IF NOT EXISTS `jobbi_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `jobbi_db`;
 
 -- --------------------------------------------------------
 
@@ -35,8 +37,18 @@ CREATE TABLE `BookAppointment` (
   `id_service` int(11) NOT NULL,
   `appointment_date` date NOT NULL,
   `appointment_time` time NOT NULL,
-  `state_appointment` int(11) DEFAULT NULL
+  `state_appointment` int(11) DEFAULT NULL,
+  `appointment_end` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `BookAppointment`
+--
+
+INSERT INTO `BookAppointment` (`id_book_appointment`, `id_client`, `id_branch`, `id_employee`, `id_service`, `appointment_date`, `appointment_time`, `state_appointment`, `appointment_end`) VALUES
+(1, 16, 5, 1, 2, '2025-10-21', '11:30:00', 3, '00:00:00'),
+(2, 7, 5, 9, 12, '2025-10-21', '11:30:00', 4, '00:00:00'),
+(3, 7, 5, 13, 12, '2025-10-20', '10:30:00', 0, '00:00:00');
 
 -- --------------------------------------------------------
 
@@ -59,18 +71,10 @@ CREATE TABLE `Branch` (
 --
 
 INSERT INTO `Branch` (`id_branch`, `id_business`, `name`, `location`, `phone`, `email`, `state_branch`) VALUES
-(2, 2, 'Tech Garage', 'Main Street 123', '555-9999', 'garage@tech.com', 1),
-(3, 3, 'Jobbi Job', 'Main Street 789', '555-9999', 'jobbi@tech.com', 1),
-(4, 4, 'Orlando\'s Jobbi', 'Main Street 789', '555-9999', 'orlandojobbi@tech.com', 1),
-(5, 5, 'Orlando\'s Jobbi', 'Main Street 789', '555-9999', 'orlandojobbi@tech.com', 0),
-(6, 6, 'Negocio 1', 'Guápiles', '89898989', 'dan1@gmail.com', 1),
-(7, 7, 'Negocio 1', 'Guápiles', '89898989', 'dan1@gmail.com', 1),
-(8, 8, 'Si pa', 'Hola', '64646464', 'Gahsgs@gmail.com', 1),
-(9, 9, 'Hoajj', 'Jdhd', '31545454', 'Gsgsgw@gmail.com', 1),
-(10, 10, 'Hshd', 'Hsydh', '946454', 'Gsgdhdhd@gmail.com', 1),
-(11, 11, 'Gshd', 'Bdbdd', '87845454', 'G@gmail.com', 1),
-(12, 12, 'Jobbi Tech', 'Puerto Viejo, Heredia.', '84838684', 'jobbitech@gmail.com', 1),
-(13, 13, 'El Yugo', 'Cruce Guapiles', '86862451', 'yugoinfo@gmail.com', 1);
+(5, 5, 'Orlando\'s Jobbi actu', 'Main Street 789', '555-9999', 'orlandojobbi@tech.com', 1),
+(26, 19, 'branch 2', 'ubicacion del branch', '45787545', 'branch2@gmail.com', 1),
+(27, 20, 'branch 3', 'ubicacion del branch 3', '12365478', 'branch3@gmail.com', 1),
+(28, 5, 'De Jeycob', 'La ubi', '44444444', 'elsegundo@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -93,18 +97,9 @@ CREATE TABLE `Business` (
 --
 
 INSERT INTO `Business` (`id_business`, `id_user_admin`, `name`, `location`, `phone`, `email`, `state_business`) VALUES
-(2, 7, 'Tech Garage', 'Main Street 123', '555-9999', 'garage@tech.com', 1),
-(3, 7, 'Jobbi Job', 'Main Street 789', '555-9999', 'jobbi@tech.com', 1),
-(4, 7, 'Orlando\'s Jobbi', 'Main Street 789', '555-9999', 'orlandojobbi@tech.com', 1),
-(5, 8, 'Orlando\'s Jobbi', 'Main Street 789', '555-9999', 'orlandojobbi@tech.com', 0),
-(6, 8, 'Negocio 1', 'Guápiles', '89898989', 'dan1@gmail.com', 1),
-(7, 8, 'Negocio 1', 'Guápiles', '89898989', 'dan1@gmail.com', 1),
-(8, 8, 'Si pa', 'Hola', '64646464', 'Gahsgs@gmail.com', 1),
-(9, 8, 'Hoajj', 'Jdhd', '31545454', 'Gsgsgw@gmail.com', 1),
-(10, 8, 'Hshd', 'Hsydh', '946454', 'Gsgdhdhd@gmail.com', 1),
-(11, 8, 'Gshd', 'Bdbdd', '87845454', 'G@gmail.com', 1),
-(12, 15, 'Jobbi Tech', 'Puerto Viejo, Heredia.', '84838684', 'jobbitech@gmail.com', 1),
-(13, 15, 'Verduleria La Finca', 'Cruce Río Frio', '86862451', 'lafinca@gmail.com', 1);
+(5, 7, 'Orlando\'s Jobbi', 'Main Street 789', '555-9999', 'orlandojobbi@tech.com', 1),
+(19, 16, 'Negocio 2', 'la ubicación', '44556699', 'negocio2@gmail.com', 1),
+(20, 17, 'negocio 3', 'ubicacion del negocio 3', '45698741', 'negocio3@gmail.com', 1);
 
 -- --------------------------------------------------------
 
@@ -131,6 +126,15 @@ CREATE TABLE `ClientPoints` (
   `last_update` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `ClientPoints`
+--
+
+INSERT INTO `ClientPoints` (`id_client_points`, `id_user`, `total_points`, `redeemed_points`, `last_update`) VALUES
+(1, 7, 1000, 3700, '2025-10-24 08:30:30'),
+(2, 15, 200, 4300, '2025-10-25 01:04:29'),
+(3, 17, 500, 50, '2025-10-23 04:51:13');
+
 -- --------------------------------------------------------
 
 --
@@ -144,6 +148,15 @@ CREATE TABLE `Employee` (
   `availability` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `Employee`
+--
+
+INSERT INTO `Employee` (`id_employee`, `id_branch`, `id_user`, `availability`) VALUES
+(9, 5, 17, 1),
+(12, 5, 7, 1),
+(13, 5, 23, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -154,12 +167,45 @@ CREATE TABLE `Gifts` (
   `id_gift` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
+  `discount` int(11) NOT NULL,
   `for_role` int(11) DEFAULT NULL,
   `min_points` int(11) DEFAULT NULL,
   `min_rating` double DEFAULT NULL,
   `reward_type` varchar(255) DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Gifts`
+--
+
+INSERT INTO `Gifts` (`id_gift`, `name`, `description`, `discount`, `for_role`, `min_points`, `min_rating`, `reward_type`, `is_active`) VALUES
+(1, 'Recompensa Destacado', 'Negocio aparece primero en búsquedas', 0, 1, 1000, 0, 'prioridad', 1),
+(2, 'Descuento 10%', '10% en servicios seleccionados', 10, 2, 500, 0, 'descuento', 1),
+(3, '15% Discount', '15% off your next service', 15, 2, 600, 0, 'descuento', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Invitation`
+--
+
+CREATE TABLE `Invitation` (
+  `id_invitation` int(11) NOT NULL,
+  `id_client` int(11) NOT NULL,
+  `id_branch` int(11) NOT NULL,
+  `state_invitation` tinyint(4) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Invitation`
+--
+
+INSERT INTO `Invitation` (`id_invitation`, `id_client`, `id_branch`, `state_invitation`) VALUES
+(4, 16, 0, 1),
+(5, 16, 5, 1),
+(6, 16, 5, 1),
+(7, 16, 5, 1);
 
 -- --------------------------------------------------------
 
@@ -270,9 +316,16 @@ CREATE TABLE `Service` (
 --
 
 INSERT INTO `Service` (`id_service`, `id_branch`, `id_specialty`, `name`, `description`, `price`, `duration`, `state_service`) VALUES
-(1, 2, 3, 'Premium Haircut', 'Includes styling', 35, 45, 0),
-(2, 2, 3, 'Haircut', 'Basic haircut service', 20, 30, 1),
-(3, 2, 3, 'Premium Haircut', 'Premium haircut service', 20, 30, 1);
+(12, 5, 1, 'Corte de pelo clásico', 'Corte clásico para hombres', 150, 30, 1),
+(13, 5, 2, 'Manicure corte', 'Manicure sencillo con esmalte', 200, 45, 1),
+(14, 5, 1, 'Corte de pelo moderno', 'Corte moderno y estilizado', 180, 40, 1),
+(15, 28, 3, 'Afeitado premium corte', 'Afeitado con toalla caliente', 220, 30, 1),
+(16, 26, 2, 'Peinado para eventos corte', 'Peinado especial para eventos', 300, 60, 1),
+(17, 26, 1, 'Corte infantil', 'Corte especial para niños', 100, 25, 1),
+(18, 27, 3, 'Masaje corte relajante', 'Masaje de cuerpo completo', 400, 50, 1),
+(19, 27, 2, 'Tratamiento facial corte', 'Limpieza y hidratación facial', 350, 45, 1),
+(20, 27, 1, 'Barba estilizada corte', 'Perfilado y cuidado de barba', 120, 20, 1),
+(21, 27, 3, 'Masaje deportivo corte', 'Masaje para aliviar músculos', 450, 55, 1);
 
 -- --------------------------------------------------------
 
@@ -343,17 +396,13 @@ CREATE TABLE `User` (
 --
 
 INSERT INTO `User` (`id_user`, `id_rol`, `name`, `last_name`, `email`, `phone`, `password`, `state_user`) VALUES
-(5, 2, 'María', 'García', 'maria.garcia@example.com', '60012345', '$2b$10$fpacgqz9rLLdXn1bJAymo.PR3QzmgWw8fh.OIwtMPfdhDCqTxXOFS', 1),
-(6, 2, 'María', 'García', 'mariaaaaa.garcia@example.com', '60012345', '$2b$10$SnAr0CBheHqsnWiRRHqsy.XsgS44li/k6Lv3kcCELvjSHiZTCE2Bi', 1),
-(7, 1, 'Jeycob', 'García', 'jeycobbarrientosgarcia@gmail.com', '84838684', '$2b$10$Wccjzf.xHELOf2rLFxW6beA97yTvhWbUe.rf7LLjgOdgqLgTN2S4u', 1),
-(8, 1, 'Daniel', 'Briones', 'danielbrionesvargas@gmail.com', '88882222', '$2b$10$RbUfs.KRKDB.i2rGGKEH2e50xUT9BxrxT5srtJ0aMjLOLcJ8LryTy', 1),
+(7, 3, 'Jeycob', 'García', 'jeycobbarrientosgarcia@gmail.com', '84838684', '$2b$10$Wccjzf.xHELOf2rLFxW6beA97yTvhWbUe.rf7LLjgOdgqLgTN2S4u', 1),
+(8, 2, 'Daniel', 'Briones', 'danielbrionesvargas@gmail.com', '88882222', '$2b$10$RbUfs.KRKDB.i2rGGKEH2e50xUT9BxrxT5srtJ0aMjLOLcJ8LryTy', 1),
 (9, 2, 'Yeiler', 'Montes', 'yeiler@gmail.com', '78675635', '$2b$10$GD3dX4VjQrtYK9jbAXasJOJrMGaUc4EKImmjWLD3P5Y67wFjaQl26', 1),
-(10, 2, 'Test', 'LastTest', 'test2@gmail.com', '12345654', '$2b$10$1OVYahFsX3jBvPfjVHR5Ku9OI59Fgp43JUB2HdBPQ6ATY9bhaMD/C', 1),
-(11, 2, 'Test2', 'Test2', 'testtest@gmail.com', '34562748', '$2b$10$kOyr4FbpzY1daytzEr9Z8eum6Pz4GNVq/JnSvtI3UKCK.c/xgX7b6', 1),
-(12, 2, 'Josue', 'Porras', 'josue@gmail.com', '82726272', '$2b$10$8yRopoMaeIJLV307LDsg1.S1yWMWjFNUJix0diw/AbB4lFXAa.VGS', 1),
-(13, 2, 'Josue', 'Porras', 'josue1@gmail.com', '82726272', '$2b$10$ocAH3XgYfNQ7MdhnIzLUHev6vO8s1u0WM64mGu4cAxJ.d4GRX2uX6', 1),
-(14, 2, 'H', 'Bshd', 'f@gmail.com', '72726363', '$2b$10$9ZVI5M4eJZ2TR2raRZ1bRucNqh16KJMk1PGGlgAy3duGOwxAmHDuK', 1),
-(15, 1, 'Jobbi', 'Test', 'jobbitest@gmail.com', '84838684', '$2b$10$3dYXPat84pQ03eEJej373e1B9eyF4i5xNPb3N5lbp1iRk8kyO4Ur.', 1);
+(15, 2, 'Jobbi', 'Test', 'jobbitest@gmail.com', '84838684', '$2b$10$3dYXPat84pQ03eEJej373e1B9eyF4i5xNPb3N5lbp1iRk8kyO4Ur.', 1),
+(16, 1, 'Pruebas únicamente', 'Pruebas, la contra es Test123@', 'test@gmail.com', '84838684', '$2b$10$uNNGF6ITvp86hkG.fC4XV.2bShx8erNgcs9z5o5DX611HtdJdtLCm', 1),
+(17, 1, 'Pruebas únicamente', 'Pruebas, la contra es Test123@', 'jason@gmail.com', '84838684', '$2b$10$nj04f6GcVNmIP4fFLlIzh.W5ytI2bcBn3pJ1cBx3Ix.X08GSU8rQS', 1),
+(23, 3, 'jason', 'madrig', 'jasonmadrigal@gmail.com', '567856789', '$2b$10$Wccjzf.xHELOf2rLFxW6beA97yTvhWbUe.rf7LLjgOdgqLgTN2S4u', 1);
 
 -- --------------------------------------------------------
 
@@ -366,8 +415,24 @@ CREATE TABLE `User_Gift` (
   `id_user` int(11) NOT NULL,
   `id_gift` int(11) NOT NULL,
   `gift_date` datetime DEFAULT NULL,
-  `redeemed` tinyint(1) DEFAULT NULL
+  `redeemed` tinyint(1) DEFAULT NULL,
+  `is_active` tinyint(4) NOT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `token_expires_at` datetime DEFAULT NULL,
+  `token_created_at` datetime DEFAULT NULL,
+  `token_used` tinyint(1) DEFAULT 0,
+  `token_used_at` datetime DEFAULT NULL,
+  `token_generated_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `User_Gift`
+--
+
+INSERT INTO `User_Gift` (`id_user_gift`, `id_user`, `id_gift`, `gift_date`, `redeemed`, `is_active`, `token`, `token_expires_at`, `token_created_at`, `token_used`, `token_used_at`, `token_generated_by`) VALUES
+(1, 7, 1, '2025-10-23 04:28:26', 1, 1, NULL, NULL, NULL, 0, NULL, NULL),
+(2, 17, 1, '2025-10-23 04:28:26', 1, 1, NULL, NULL, NULL, 0, NULL, NULL),
+(13, 7, 2, '2025-10-24 08:30:30', 1, 0, NULL, NULL, NULL, 0, NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -417,6 +482,12 @@ ALTER TABLE `Employee`
 --
 ALTER TABLE `Gifts`
   ADD PRIMARY KEY (`id_gift`);
+
+--
+-- Indexes for table `Invitation`
+--
+ALTER TABLE `Invitation`
+  ADD PRIMARY KEY (`id_invitation`);
 
 --
 -- Indexes for table `Message`
@@ -478,7 +549,9 @@ ALTER TABLE `User`
 -- Indexes for table `User_Gift`
 --
 ALTER TABLE `User_Gift`
-  ADD PRIMARY KEY (`id_user_gift`);
+  ADD PRIMARY KEY (`id_user_gift`),
+  ADD UNIQUE KEY `unique_user_gift` (`id_user`,`id_gift`),
+  ADD UNIQUE KEY `token` (`token`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -488,19 +561,19 @@ ALTER TABLE `User_Gift`
 -- AUTO_INCREMENT for table `BookAppointment`
 --
 ALTER TABLE `BookAppointment`
-  MODIFY `id_book_appointment` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_book_appointment` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `Branch`
 --
 ALTER TABLE `Branch`
-  MODIFY `id_branch` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_branch` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `Business`
 --
 ALTER TABLE `Business`
-  MODIFY `id_business` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_business` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `CharacteristicsPlans`
@@ -512,19 +585,25 @@ ALTER TABLE `CharacteristicsPlans`
 -- AUTO_INCREMENT for table `ClientPoints`
 --
 ALTER TABLE `ClientPoints`
-  MODIFY `id_client_points` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_client_points` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `Employee`
 --
 ALTER TABLE `Employee`
-  MODIFY `id_employee` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_employee` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `Gifts`
 --
 ALTER TABLE `Gifts`
-  MODIFY `id_gift` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_gift` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `Invitation`
+--
+ALTER TABLE `Invitation`
+  MODIFY `id_invitation` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `Message`
@@ -554,7 +633,7 @@ ALTER TABLE `Rol`
 -- AUTO_INCREMENT for table `Service`
 --
 ALTER TABLE `Service`
-  MODIFY `id_service` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_service` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `Specialty`
@@ -578,13 +657,13 @@ ALTER TABLE `Subscriptions`
 -- AUTO_INCREMENT for table `User`
 --
 ALTER TABLE `User`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `User_Gift`
 --
 ALTER TABLE `User_Gift`
-  MODIFY `id_user_gift` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_user_gift` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Constraints for dumped tables
