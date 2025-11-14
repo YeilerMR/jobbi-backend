@@ -6,18 +6,18 @@ exports.createEvent = async (id_employee, event) => {
     try {
         const [result] = await conn.execute(
             `INSERT INTO booked_events 
-             (id_employee, title, start, end, type, recurrence, google_event_id, id_client, id_branch)
+             (id_employee, id_branch, id_client, title, start, end, type, recurrence, google_event_id)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 id_employee,
+                event.id_branch,
+                event.id_client,
                 event.title,
                 event.start,
                 event.end,
-                event.type || 'other',
+                event.type || 'client',
                 event.recurrence ? JSON.stringify(event.recurrence) : null,
-                event.google_event_id,
-                event.id_client,
-                event.id_branch
+                event.google_event_id
             ]
         );
 
@@ -26,6 +26,8 @@ exports.createEvent = async (id_employee, event) => {
         await conn.end();
     }
 };
+
+
 
 exports.updateEvent = async (id_employee, id, event) => {
     const conn = await createConnection();
@@ -190,47 +192,47 @@ exports.getCalendarDB = async (id_employee) => {
 
 // Inserts default calendar configuration for an employee
 exports.createDefaultCalendarForEmployee = async (id_employee) => {
-  // Default values for a brand-new business
-  const DEFAULT_CONFIG = {
-    slot_duration_minutes: 30,
-    buffer_between_bookings_minutes: 15,
-    booking_window_days: 30,
-    min_booking_duration_slots: 1,
-    max_booking_duration_slots: 4
-  };
+    // Default values for a brand-new business
+    const DEFAULT_CONFIG = {
+        slot_duration_minutes: 30,
+        buffer_between_bookings_minutes: 15,
+        booking_window_days: 30,
+        min_booking_duration_slots: 1,
+        max_booking_duration_slots: 4
+    };
 
-  const conn = await createConnection();
-  // Insert into calendar_config
-  await conn.query(
-    `
+    const conn = await createConnection();
+    // Insert into calendar_config
+    await conn.query(
+        `
       INSERT INTO calendar_config 
       (id_employee, slot_duration_minutes, buffer_between_bookings_minutes,
        booking_window_days, min_booking_duration_slots, max_booking_duration_slots)
       VALUES (?, ?, ?, ?, ?, ?)
     `,
-    [
-      id_employee,
-      DEFAULT_CONFIG.slot_duration_minutes,
-      DEFAULT_CONFIG.buffer_between_bookings_minutes,
-      DEFAULT_CONFIG.booking_window_days,
-      DEFAULT_CONFIG.min_booking_duration_slots,
-      DEFAULT_CONFIG.max_booking_duration_slots
-    ]
-  );
+        [
+            id_employee,
+            DEFAULT_CONFIG.slot_duration_minutes,
+            DEFAULT_CONFIG.buffer_between_bookings_minutes,
+            DEFAULT_CONFIG.booking_window_days,
+            DEFAULT_CONFIG.min_booking_duration_slots,
+            DEFAULT_CONFIG.max_booking_duration_slots
+        ]
+    );
 
-  // Insert default working hours (Mon–Fri, 09:00–17:00)
-  const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  const WORKING_HOURS = JSON.stringify({ available: ["09:00-17:00"] });
+    // Insert default working hours (Mon–Fri, 09:00–17:00)
+    const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const WORKING_HOURS = JSON.stringify({ available: ["09:00-17:00"] });
 
-  for (const day of DAYS) {
-    await conn.query(
-      `
+    for (const day of DAYS) {
+        await conn.query(
+            `
         INSERT INTO working_hours (id_employee, day_of_week, time_ranges)
         VALUES (?, ?, ?)
       `,
-      [id_employee, day, WORKING_HOURS]
-    );
-  }
+            [id_employee, day, WORKING_HOURS]
+        );
+    }
 
-  return { success: true };
+    return { success: true };
 };

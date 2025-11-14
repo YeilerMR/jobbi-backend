@@ -21,65 +21,62 @@ exports.getEvents = async (req, res) => {
 
 exports.createEvent = async (req, res) => {
     try {
-        const { id_employee } = req.params;
-        const eventData = req.body;
+        const payload = req.body;
+        const id_client = req.user.id_user;
 
-        // Validate required fields
-        const requiredFields = ['title', 'start', 'end'];
-        for (const field of requiredFields) {
-            if (!eventData[field]) {
+        if (!id_client)
+            return res.status(400).json({ success: false, message: "Invalid client token" });
+
+        const required = ["id_branch", "id_employee", "id_service", "appointment_date", "appointment_time"];
+        for (const field of required) {
+            if (!payload[field]) {
                 return res.status(400).json({ success: false, message: `${field} is required` });
             }
         }
 
-        // Extract IDs
-        const id_client = req.user.id_user || null;
-        const id_branch = eventData.branch?.id_branch || null;
-
-        if (!id_client || !id_branch) {
-            return res.status(400).json({
-                success: false,
-                message: "Both id_client and id_branch are required in the request body."
-            });
-        }
+        // Build event
+        const event = await calendarService.buildEventFromReducedPayload(payload, id_client);
 
         // Check availability
         const availabilityCheck = await calendarService.checkAvailability(
-            id_employee,
-            eventData.start,
-            eventData.end
+            payload.id_employee,
+            event.start,
+            event.end
         );
+
         if (!availabilityCheck.available) {
             return res.status(409).json({
                 success: false,
-                message: 'The selected time slot is already booked or unavailable',
+                message: "Time slot unavailable",
                 conflictingEvent: availabilityCheck.conflict
             });
         }
 
-        // Google Calendar Auth
+        // Google auth
         const auth = await authorize();
 
-        // Create event in both Google Calendar and DB
+        // Create Google + DB
         const googleEvent = await calendarService.createEvent(
             auth,
-            id_employee,
-            id_branch,
+            payload.id_employee,
+            payload.id_branch,
             id_client,
-            eventData
+            event
         );
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
             message: "Event created successfully",
-            data: googleEvent,
+            data: googleEvent
         });
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
+
+
 
 
 exports.updateEvent = async (req, res) => {
